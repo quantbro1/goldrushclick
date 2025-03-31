@@ -44,14 +44,14 @@
   <div id="shop">
     <h2>Shop</h2>
     <ul id="shopList">
-      <li><button id="basicPickaxe">Basic Pickaxe (10 coins, +1 DPS)</button></li>
-      <li><button id="ironPickaxe">Iron Pickaxe (50 coins, +2 DPS)</button></li>
-      <li><button id="goldPickaxe">Gold Pickaxe (200 coins, +5 DPS)</button></li>
-      <li><button id="diamondPickaxe">Diamond Pickaxe (1000 coins, +10 DPS)</button></li>
-      <li><button id="autoMiner">Auto-Miner (100 coins, +1 DPS)</button></li>
-      <li><button id="megaMiner">Mega-Miner (500 coins, +5 DPS)</button></li>
-      <li><button id="goldVault">Gold Vault (2000 coins, +20 DPS)</button></li>
-      <li><button id="premium1">Premium Rush ($1, +2 DPS)</button></li>
+      <li><button id="basicPickaxe">Basic Pickaxe (20 coins, +1 DPS)</button></li>
+      <li><button id="ironPickaxe">Iron Pickaxe (40 coins, +2 DPS)</button></li>
+      <li><button id="goldPickaxe">Gold Pickaxe (100 coins, +5 DPS)</button></li>
+      <li><button id="diamondPickaxe">Diamond Pickaxe (200 coins, +10 DPS)</button></li>
+      <li><button id="autoMiner">Auto-Miner (400 coins, +20 DPS)</button></li>
+      <li><button id="megaMiner">Mega-Miner (1000 coins, +50 DPS)</button></li>
+      <li><button id="goldVault">Gold Vault (2000 coins, +100 DPS)</button></li>
+      <li><button id="premium1">Premium Rush ($1, +200 DPS)</button></li>
     </ul>
   </div>
 
@@ -84,8 +84,8 @@
     <p>Welcome to GoldRushClick! Here’s how to get started:</p>
     <ul style="text-align: left;">
       <li><strong>Click for Gold</strong>: Click the "⛏️ Click for Gold!" text to earn coins.</li>
-      <li><strong>Buy Upgrades</strong>: Spend coins in the Shop to increase your Digs per Second (DPS). Start with a Basic Pickaxe (10 coins) and work up to a Gold Vault (2000 coins)!</li>
-      <li><strong>Premium Rush</strong>: Pay $1 to boost your DPS by 2—perfect for a quick jump.</li>
+      <li><strong>Buy Upgrades</strong>: Spend coins in the Shop to increase your Digs per Second (DPS). Start with a Basic Pickaxe (20 coins) and work up to a Gold Vault (2000 coins)!</li>
+      <li><strong>Premium Rush</strong>: Pay $1 for a massive +200 DPS boost—best value in the game!</li>
       <li><strong>Prestige</strong>: Once you hit 1000 coins, reset your progress for a 1.5x multiplier—stack it up for huge gains!</li>
       <li><strong>Refer Friends</strong>: Share your referral code (in Stats). When they use it, you both get 50 coins.</li>
       <li><strong>Events</strong>: Watch for "Gold Rush" (2x coins, 30s) or "Coin Shower" (10x coins, 10s) events—stack them for crazy rewards!</li>
@@ -390,20 +390,20 @@
       }
     }
 
-    if (window.location.search.includes('premium=true') && digsPerSecond < 2) {
-      digsPerSecond = 2;
+    if (window.location.search.includes('premium=true') && digsPerSecond < 200) {
+      digsPerSecond = 200;
       savePlayerData();
-      alert("Premium Rush activated! +2 DPS!");
+      alert("Premium Rush activated! +200 DPS!");
     }
 
     document.getElementById("gold").addEventListener("click", dig);
-    document.getElementById("basicPickaxe").addEventListener("click", () => buyUpgrade(10, 1, "Basic Pickaxe"));
-    document.getElementById("ironPickaxe").addEventListener("click", () => buyUpgrade(50, 2, "Iron Pickaxe"));
-    document.getElementById("goldPickaxe").addEventListener("click", () => buyUpgrade(200, 5, "Gold Pickaxe"));
-    document.getElementById("diamondPickaxe").addEventListener("click", () => buyUpgrade(1000, 10, "Diamond Pickaxe"));
-    document.getElementById("autoMiner").addEventListener("click", () => buyUpgrade(100, 1, "Auto-Miner"));
-    document.getElementById("megaMiner").addEventListener("click", () => buyUpgrade(500, 5, "Mega-Miner"));
-    document.getElementById("goldVault").addEventListener("click", () => buyUpgrade(2000, 20, "Gold Vault"));
+    document.getElementById("basicPickaxe").addEventListener("click", () => buyUpgrade(20, 1, "Basic Pickaxe"));
+    document.getElementById("ironPickaxe").addEventListener("click", () => buyUpgrade(40, 2, "Iron Pickaxe"));
+    document.getElementById("goldPickaxe").addEventListener("click", () => buyUpgrade(100, 5, "Gold Pickaxe"));
+    document.getElementById("diamondPickaxe").addEventListener("click", () => buyUpgrade(200, 10, "Diamond Pickaxe"));
+    document.getElementById("autoMiner").addEventListener("click", () => buyUpgrade(400, 20, "Auto-Miner"));
+    document.getElementById("megaMiner").addEventListener("click", () => buyUpgrade(1000, 50, "Mega-Miner"));
+    document.getElementById("goldVault").addEventListener("click", () => buyUpgrade(2000, 100, "Gold Vault"));
     document.getElementById("premium1").addEventListener("click", goPremium);
     document.getElementById("prestigeBtn").addEventListener("click", prestige);
     document.getElementById("claimReferral").addEventListener("click", claimReferral);
