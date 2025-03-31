@@ -119,7 +119,7 @@
       <li><strong>Changes</strong>: We can update the game or these terms anytime.</li>
       <li><strong>Liability</strong>: We’re not responsible if the game breaks or you lose progress—play at your own risk.</li>
     </ul>
-    <p>Questions? Check the GitHub repo. Last updated: March 31, 2025.</p>
+    <p>Questions? Check the <a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub repo</a>. Last updated: March 31, 2025.</p>
     <button onclick="document.getElementById('terms').style.display='none'">Close</button>
   </div>
 
@@ -224,7 +224,7 @@
       setTimeout(() => pop.remove(), 1000);
       checkAchievements();
       updateDisplay(false);
-      new Audio('https://www.myinstants.com/media/sounds/coin.wav').play(); // Free coin sound
+      new Audio('https://www.myinstants.com/media/sounds/coin.wav').play();
     }
 
     function buyUpgrade(cost, dpsIncrease, itemName) {
@@ -369,20 +369,20 @@
         eventActive = true;
         document.getElementById("eventBanner").textContent = "Gold Rush! 2x Coins for 30s!";
         document.getElementById("eventBanner").style.display = "block";
-        new Audio('https://www.myinstants.com/media/sounds/level-up.mp3').play(); // Free jingle
+        new Audio('https://www.myinstants.com/media/sounds/level-up.mp3').play();
         setTimeout(() => {
           eventActive = false;
-          document.getElementById("eventBanner").style.display = "none";
+          if (!showerActive) document.getElementById("eventBanner").style.display = "none";
         }, 30000);
       }
     }
 
     function startCoinShower() {
-      if (!showerActive && Math.random() < 0.02) { // 2% chance every 60s
+      if (!showerActive && Math.random() < 0.02) {
         showerActive = true;
         document.getElementById("eventBanner").textContent = "Coin Shower! 10x Coins for 10s!";
         document.getElementById("eventBanner").style.display = "block";
-        new Audio('https://www.myinstants.com/media/sounds/power-up.mp3').play(); // Free jingle
+        new Audio('https://www.myinstants.com/media/sounds/power-up.mp3').play();
         setTimeout(() => {
           showerActive = false;
           if (!eventActive) document.getElementById("eventBanner").style.display = "none";
