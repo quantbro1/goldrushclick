@@ -30,7 +30,7 @@
 
   <div id="ad">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8529571438098551" crossorigin="anonymous"></script>
-    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-8529571438098551" data-ad-slot="1234567890"></ins> <!-- Replace 1234567890 with real ad slot -->
+    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-8529571438098551" data-ad-slot="YOUR_AD_SLOT_HERE"></ins> <!-- Replace with real slot ID -->
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
@@ -83,7 +83,7 @@
         await docRef.set({ coins: 0, digsPerSecond: 0 });
         lastSavedCoins = 0;
       }
-      updateDisplay(true); // Load leaderboard initially
+      updateDisplay(true);
     }
 
     async function savePlayerData() {
@@ -134,22 +134,31 @@
       document.getElementById("dps").innerText = digsPerSecond;
 
       if (includeLeaderboard) {
-        console.log("Leaderboard updating", Date.now());
+        console.log("Leaderboard updating attempt", Date.now(), "Last update:", lastLeaderboardUpdate);
         const now = Date.now();
-        if (now - lastLeaderboardUpdate >= 300000) { // 5 mins
+        // Throttle auto-updates (5 mins), but allow manual refresh anytime
+        if (now - lastLeaderboardUpdate >= 300000 || !window.autoUpdate) {
+          console.log("Fetching leaderboard...");
           const leaderboardList = document.getElementById("leaderboardList");
           leaderboardList.innerHTML = "";
-          const snapshot = await db.collection("players")
-            .orderBy("coins", "desc")
-            .limit(5)
-            .get();
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            const li = document.createElement("li");
-            li.textContent = `${doc.id}: ${data.coins} coins`;
-            leaderboardList.appendChild(li);
-          });
-          lastLeaderboardUpdate = now;
+          try {
+            const snapshot = await db.collection("players")
+              .orderBy("coins", "desc")
+              .limit(5)
+              .get();
+            snapshot.forEach(doc => {
+              const data = doc.data();
+              const li = document.createElement("li");
+              li.textContent = `${doc.id}: ${data.coins} coins`;
+              leaderboardList.appendChild(li);
+            });
+            lastLeaderboardUpdate = now;
+            console.log("Leaderboard updated successfully");
+          } catch (error) {
+            console.error("Leaderboard fetch failed:", error);
+          }
+        } else {
+          console.log("Leaderboard skipped - within 5-min throttle");
         }
       }
     }
@@ -163,7 +172,11 @@
     document.getElementById("gold").addEventListener("click", dig);
     document.getElementById("upgradeBtn").addEventListener("click", buyUpgrade);
     document.getElementById("premiumBtn").addEventListener("click", goPremium);
-    document.getElementById("refreshLeaderboard").addEventListener("click", () => updateDisplay(true));
+    document.getElementById("refreshLeaderboard").addEventListener("click", () => {
+      window.autoUpdate = false; // Flag manual refresh
+      updateDisplay(true);
+      window.autoUpdate = true; // Reset for auto-updates
+    });
 
     setInterval(async () => {
       coins += digsPerSecond * 30;
@@ -172,6 +185,7 @@
     }, 30000);
 
     setInterval(() => {
+      window.autoUpdate = true; // Mark as auto-update
       updateDisplay(true);
     }, 300000);
 
