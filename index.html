@@ -30,12 +30,13 @@
 
   <div id="ad">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8529571438098551" crossorigin="anonymous"></script>
-    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-8529571438098551" data-ad-slot="1234567890"></ins>
+    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-8529571438098551" data-ad-slot="1234567890"></ins> <!-- Replace 1234567890 with real ad slot -->
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
   <div id="leaderboard">
     <h2>Leaderboard</h2>
+    <button id="refreshLeaderboard">Refresh Leaderboard</button>
     <ul id="leaderboardList"></ul>
   </div>
 
@@ -67,8 +68,8 @@
 
     let coins = 0;
     let digsPerSecond = 0;
-    let lastSavedCoins = 0; // Track last saved state for batching
-    let lastLeaderboardUpdate = 0; // Timestamp for leaderboard throttling
+    let lastSavedCoins = 0;
+    let lastLeaderboardUpdate = 0;
 
     async function loadPlayerData() {
       const docRef = db.collection("players").doc(username);
@@ -82,11 +83,11 @@
         await docRef.set({ coins: 0, digsPerSecond: 0 });
         lastSavedCoins = 0;
       }
-      updateDisplay(false); // No leaderboard on load
+      updateDisplay(true); // Load leaderboard initially
     }
 
     async function savePlayerData() {
-      if (coins !== lastSavedCoins) { // Only save if coins changed
+      if (coins !== lastSavedCoins) {
         await db.collection("players").doc(username).set({
           coins: coins,
           digsPerSecond: digsPerSecond,
@@ -99,7 +100,7 @@
     function dig() {
       console.log("Dig clicked!");
       coins++;
-      updateDisplay(false); // No leaderboard here
+      updateDisplay(false);
     }
 
     function buyUpgrade() {
@@ -107,7 +108,7 @@
       if (coins >= 10) {
         coins -= 10;
         digsPerSecond++;
-        updateDisplay(false); // No leaderboard
+        updateDisplay(false);
       } else {
         alert("Not enough coins! Keep digging!");
       }
@@ -133,8 +134,9 @@
       document.getElementById("dps").innerText = digsPerSecond;
 
       if (includeLeaderboard) {
+        console.log("Leaderboard updating", Date.now());
         const now = Date.now();
-        if (now - lastLeaderboardUpdate >= 300000) { // 5 mins = 300,000 ms
+        if (now - lastLeaderboardUpdate >= 300000) { // 5 mins
           const leaderboardList = document.getElementById("leaderboardList");
           leaderboardList.innerHTML = "";
           const snapshot = await db.collection("players")
@@ -161,15 +163,14 @@
     document.getElementById("gold").addEventListener("click", dig);
     document.getElementById("upgradeBtn").addEventListener("click", buyUpgrade);
     document.getElementById("premiumBtn").addEventListener("click", goPremium);
+    document.getElementById("refreshLeaderboard").addEventListener("click", () => updateDisplay(true));
 
-    // Batch auto-dig and save every 30 seconds
     setInterval(async () => {
-      coins += digsPerSecond * 30; // Accumulate 30 secs of digs
+      coins += digsPerSecond * 30;
       await savePlayerData();
-      updateDisplay(false); // No leaderboard
+      updateDisplay(false);
     }, 30000);
 
-    // Leaderboard refresh every 5 minutes (standalone)
     setInterval(() => {
       updateDisplay(true);
     }, 300000);
