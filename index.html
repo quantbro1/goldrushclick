@@ -13,10 +13,12 @@
     #gold:hover { transform: scale(1.1); }
     #ad { margin: 20px auto; max-width: 300px; }
     p { font-size: 20px; }
-    #leaderboard { margin-top: 20px; }
-    #leaderboard h2 { font-size: 24px; color: #d4a017; }
-    #leaderboardList { list-style: none; padding: 0; }
-    #leaderboardList li { font-size: 18px; margin: 5px 0; }
+    #leaderboard, #shop, #achievements { margin-top: 20px; }
+    #leaderboard h2, #shop h2, #achievements h2 { font-size: 24px; color: #d4a017; }
+    #leaderboardList, #shopList, #achievementsList { list-style: none; padding: 0; }
+    #leaderboardList li, #shopList li, #achievementsList li { font-size: 18px; margin: 5px 0; }
+    .coin-pop { position: absolute; color: #d4a017; font-size: 20px; animation: fadeUp 1s forwards; }
+    @keyframes fadeUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }
   </style>
 </head>
 <body>
@@ -32,6 +34,20 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8529571438098551" crossorigin="anonymous"></script>
     <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-8529571438098551" data-ad-slot="YOUR_AD_SLOT_HERE"></ins> <!-- Replace with real slot ID -->
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <div id="shop">
+    <h2>Shop</h2>
+    <ul id="shopList">
+      <li><button id="ironPickaxe">Iron Pickaxe (50 coins, +2 DPS)</button></li>
+      <li><button id="goldPickaxe">Gold Pickaxe (200 coins, +5 DPS)</button></li>
+      <li><button id="autoMiner">Auto-Miner (100 coins, +1 DPS)</button></li>
+    </ul>
+  </div>
+
+  <div id="achievements">
+    <h2>Achievements</h2>
+    <ul id="achievementsList"></ul>
   </div>
 
   <div id="leaderboard">
@@ -70,6 +86,7 @@
     let digsPerSecond = 0;
     let lastSavedCoins = 0;
     let lastLeaderboardUpdate = 0;
+    let achievements = [];
 
     async function loadPlayerData() {
       const docRef = db.collection("players").doc(username);
@@ -78,40 +95,53 @@
         const data = doc.data();
         coins = data.coins || 0;
         digsPerSecond = data.digsPerSecond || 0;
+        achievements = data.achievements || [];
         lastSavedCoins = coins;
       } else {
-        await docRef.set({ coins: 0, digsPerSecond: 0 });
+        await docRef.set({ coins: 0, digsPerSecond: 0, achievements: [] });
         lastSavedCoins = 0;
       }
       updateDisplay(true);
+      updateAchievements();
     }
 
     async function savePlayerData() {
-      if (coins !== lastSavedCoins) {
+      if (coins !== lastSavedCoins || achievements.length !== (await db.collection("players").doc(username).get()).data().achievements?.length) {
         await db.collection("players").doc(username).set({
           coins: coins,
           digsPerSecond: digsPerSecond,
+          achievements: achievements,
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         });
         lastSavedCoins = coins;
-        console.log("Saved to Firestore:", coins);
+        console.log("Saved to Firestore:", coins, achievements);
       }
     }
 
     function dig() {
       console.log("Dig clicked!");
       coins++;
+      const gold = document.getElementById("gold");
+      const pop = document.createElement("div");
+      pop.className = "coin-pop";
+      pop.textContent = "+1";
+      pop.style.left = `${gold.offsetLeft + 20}px`;
+      pop.style.top = `${gold.offsetTop - 20}px`;
+      document.body.appendChild(pop);
+      setTimeout(() => pop.remove(), 1000);
+      checkAchievements();
       updateDisplay(false);
     }
 
-    function buyUpgrade() {
-      console.log("Upgrade clicked!");
-      if (coins >= 10) {
-        coins -= 10;
-        digsPerSecond++;
+    function buyUpgrade(cost, dpsIncrease, itemName) {
+      if (coins >= cost) {
+        coins -= cost;
+        digsPerSecond += dpsIncrease;
+        console.log(`Bought ${itemName}`);
+        checkAchievements();
         updateDisplay(false);
       } else {
-        alert("Not enough coins! Keep digging!");
+        alert(`Not enough coins for ${itemName}! Keep digging!`);
       }
     }
 
@@ -135,11 +165,10 @@
       document.getElementById("dps").innerText = digsPerSecond;
 
       if (includeLeaderboard) {
-        console.log("Leaderboard updating attempt", Date.now(), "Last update:", lastLeaderboardUpdate);
+        console.log("Leaderboard updating attempt", Date.now());
         const now = Date.now();
         if (now - lastLeaderboardUpdate >= 300000 || !window.autoUpdate) {
           console.log("Fetching leaderboard...");
-          // Save current coins before fetching leaderboard
           await savePlayerData();
           const leaderboardList = document.getElementById("leaderboardList");
           leaderboardList.innerHTML = "";
@@ -159,10 +188,29 @@
           } catch (error) {
             console.error("Leaderboard fetch failed:", error);
           }
-        } else {
-          console.log("Leaderboard skipped - within 5-min throttle");
         }
       }
+    }
+
+    function checkAchievements() {
+      const newAchievements = [];
+      if (coins >= 100 && !achievements.includes("100 Coins")) newAchievements.push("100 Coins");
+      if (digsPerSecond >= 1 && !achievements.includes("First Upgrade")) newAchievements.push("First Upgrade");
+      if (newAchievements.length) {
+        achievements.push(...newAchievements);
+        updateAchievements();
+        savePlayerData();
+      }
+    }
+
+    function updateAchievements() {
+      const achievementsList = document.getElementById("achievementsList");
+      achievementsList.innerHTML = "";
+      achievements.forEach(ach => {
+        const li = document.createElement("li");
+        li.textContent = ach;
+        achievementsList.appendChild(li);
+      });
     }
 
     if (window.location.search.includes('premium=true') && digsPerSecond < 2) {
@@ -172,7 +220,10 @@
     }
 
     document.getElementById("gold").addEventListener("click", dig);
-    document.getElementById("upgradeBtn").addEventListener("click", buyUpgrade);
+    document.getElementById("upgradeBtn").addEventListener("click", () => buyUpgrade(10, 1, "Basic Pickaxe"));
+    document.getElementById("ironPickaxe").addEventListener("click", () => buyUpgrade(50, 2, "Iron Pickaxe"));
+    document.getElementById("goldPickaxe").addEventListener("click", () => buyUpgrade(200, 5, "Gold Pickaxe"));
+    document.getElementById("autoMiner").addEventListener("click", () => buyUpgrade(100, 1, "Auto-Miner"));
     document.getElementById("premiumBtn").addEventListener("click", goPremium);
     document.getElementById("refreshLeaderboard").addEventListener("click", () => {
       window.autoUpdate = false;
@@ -182,6 +233,7 @@
 
     setInterval(async () => {
       coins += digsPerSecond * 30;
+      checkAchievements();
       await savePlayerData();
       updateDisplay(false);
     }, 30000);
