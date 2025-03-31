@@ -20,6 +20,10 @@
     @keyframes fadeUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }
     #eventBanner { font-size: 20px; color: #d4a017; font-weight: bold; display: none; }
     .disabled { background-color: #666; cursor: not-allowed; }
+    #instructions, #privacy, #terms { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 20px; border: 2px solid #d4a017; max-width: 500px; max-height: 80%; overflow-y: auto; }
+    #footer { margin-top: 20px; font-size: 14px; }
+    #footer a { color: #d4a017; text-decoration: none; margin: 0 10px; }
+    #footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -29,6 +33,7 @@
   <p id="gold">⛏️ Click for Gold!</p>
   <p id="eventBanner"></p>
   <p>Digs per second: <span id="dps">0</span> | Multiplier: <span id="multiplier">1x</span></p>
+  <button id="showInstructions">How to Play</button>
 
   <div id="shop">
     <h2>Shop</h2>
@@ -66,6 +71,55 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8529571438098551" crossorigin="anonymous"></script>
     <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-8529571438098551" data-ad-slot="YOUR_AD_SLOT_HERE"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <div id="instructions">
+    <h2>How to Play GoldRushClick</h2>
+    <p>Welcome to GoldRushClick! Here’s how to get started:</p>
+    <ul style="text-align: left;">
+      <li><strong>Click for Gold</strong>: Click the "⛏️ Click for Gold!" text to earn coins.</li>
+      <li><strong>Buy Upgrades</strong>: Spend coins in the Shop to increase your Digs per Second (DPS). Start with a Basic Pickaxe (10 coins) and work up to a Gold Vault (2000 coins)!</li>
+      <li><strong>Premium Rush</strong>: Pay $1 to boost your DPS by 2—perfect for a quick jump.</li>
+      <li><strong>Prestige</strong>: Once you hit 1000 coins, reset your progress for a 1.5x multiplier—stack it up for huge gains!</li>
+      <li><strong>Refer Friends</strong>: Share your referral code (in Stats). When they use it, you both get 50 coins.</li>
+      <li><strong>Events</strong>: Watch for random "Gold Rush" events—double coins for 30 seconds!</li>
+      <li><strong>Achievements</strong>: Earn badges like "100 Coins" or "Click Addict" as you play.</li>
+      <li><strong>Leaderboard</strong>: Climb the ranks—top 5 players show off their coins and multipliers.</li>
+    </ul>
+    <button onclick="document.getElementById('instructions').style.display='none'">Close</button>
+  </div>
+
+  <div id="privacy">
+    <h2>Privacy Policy</h2>
+    <p>We care about your privacy. Here’s the basics:</p>
+    <ul style="text-align: left;">
+      <li><strong>Data We Collect</strong>: Your username, game progress (coins, DPS, etc.), and referral codes are stored to make the game work.</li>
+      <li><strong>How We Use It</strong>: Only to run the game and show leaderboards—nothing else.</li>
+      <li><strong>Sharing</strong>: We don’t sell or share your data, except with Firebase (our database) and Stripe (for payments) to keep things running.</li>
+      <li><strong>Cookies</strong>: We use local storage to save some stats—no tracking cookies.</li>
+      <li><strong>Contact</strong>: Questions? Ping us via the game’s GitHub.</li>
+    </ul>
+    <p>This policy might change—check back here. Last updated: March 31, 2025.</p>
+    <button onclick="document.getElementById('privacy').style.display='none'">Close</button>
+  </div>
+
+  <div id="terms">
+    <h2>Terms of Service</h2>
+    <p>By playing GoldRushClick, you agree to these rules:</p>
+    <ul style="text-align: left;">
+      <li><strong>Use</strong>: Play fair—no cheating or hacking.</li>
+      <li><strong>Payments</strong>: $1 Premium Rush is non-refundable—processed via Stripe.</li>
+      <li><strong>Data</strong>: We store your game info—see Privacy Policy.</li>
+      <li><strong>Changes</strong>: We can update the game or these terms anytime.</li>
+      <li><strong>Liability</strong>: We’re not responsible if the game breaks or you lose progress—play at your own risk.</li>
+    </ul>
+    <p>Questions? Check the GitHub repo. Last updated: March 31, 2025.</p>
+    <button onclick="document.getElementById('terms').style.display='none'">Close</button>
+  </div>
+
+  <div id="footer">
+    <a href="#" onclick="document.getElementById('privacy').style.display='block'; return false;">Privacy Policy</a>
+    <a href="#" onclick="document.getElementById('terms').style.display='block'; return false;">Terms of Service</a>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -334,6 +388,9 @@
       window.autoUpdate = false;
       updateDisplay(true);
       window.autoUpdate = true;
+    });
+    document.getElementById("showInstructions").addEventListener("click", () => {
+      document.getElementById("instructions").style.display = "block";
     });
 
     setInterval(async () => {
