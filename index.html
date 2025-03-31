@@ -65,7 +65,7 @@
 
   <div id="ad">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8529571438098551" crossorigin="anonymous"></script>
-    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-8529571438098551" data-ad-slot="YOUR_AD_SLOT_HERE"></ins> <!-- Replace with real slot ID -->
+    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-8529571438098551" data-ad-slot="YOUR_AD_SLOT_HERE"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
@@ -103,7 +103,7 @@
     let achievements = [];
     let totalClicks = 0;
     let timePlayed = 0;
-    let referralCode = btoa(username).slice(0, 8); // Simple unique code
+    let referralCode = btoa(username).slice(0, 8);
     let eventActive = false;
 
     async function loadPlayerData() {
@@ -113,7 +113,7 @@
         const data = doc.data();
         coins = data.coins || 0;
         digsPerSecond = data.digsPerSecond || 0;
-        multiplier = data.multiplier || 1;
+        multiplier = data.multiplier || 1; // Default to 1 if undefined
         achievements = data.achievements || [];
         totalClicks = data.totalClicks || 0;
         timePlayed = data.timePlayed || 0;
@@ -158,8 +158,6 @@
       setTimeout(() => pop.remove(), 1000);
       checkAchievements();
       updateDisplay(false);
-      // Play sound (uncomment if hosted with sound file)
-      // new Audio('click.wav').play();
     }
 
     function buyUpgrade(cost, dpsIncrease, itemName) {
@@ -231,10 +229,13 @@
             snapshot.forEach(doc => {
               const data = doc.data();
               const li = document.createElement("li");
-              li.textContent = `${doc.id}: ${Math.floor(data.coins)} coins (x${data.multiplier.toFixed(1)})`;
+              // Default multiplier to 1 if undefined
+              const displayMultiplier = data.multiplier || 1;
+              li.textContent = `${doc.id}: ${Math.floor(data.coins)} coins (x${displayMultiplier.toFixed(1)})`;
               leaderboardList.appendChild(li);
             });
             lastLeaderboardUpdate = now;
+            console.log("Leaderboard updated successfully");
           } catch (error) {
             console.error("Leaderboard fetch failed:", error);
           }
@@ -267,7 +268,7 @@
     }
 
     function startGoldRush() {
-      if (!eventActive && Math.random() < 0.05) { // 5% chance every 30s
+      if (!eventActive && Math.random() < 0.05) {
         eventActive = true;
         document.getElementById("eventBanner").textContent = "Gold Rush! 2x Coins for 30s!";
         document.getElementById("eventBanner").style.display = "block";
@@ -298,7 +299,7 @@
     document.getElementById("megaMiner").addEventListener("click", () => buyUpgrade(500, 5, "Mega-Miner"));
     document.getElementById("goldVault").addEventListener("click", () => buyUpgrade(2000, 20, "Gold Vault"));
     document.getElementById("premium1").addEventListener("click", () => goPremium('price_1R8lQcDIy2nI1g7eQdl4RreS', 2));
-    document.getElementById("premium5").addEventListener("click", () => goPremium('price_1R8lQcDIy2nI1g7eQdl4RreS', 5)); // Replace with real $5 price ID
+    document.getElementById("premium5").addEventListener("click", () => goPremium('price_1R8lQcDIy2nI1g7eQdl4RreS', 5));
     document.getElementById("prestigeBtn").addEventListener("click", prestige);
     document.getElementById("claimReferral").addEventListener("click", claimReferral);
     document.getElementById("refreshLeaderboard").addEventListener("click", () => {
