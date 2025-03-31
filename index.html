@@ -41,7 +41,6 @@
       <li><button id="megaMiner">Mega-Miner (500 coins, +5 DPS)</button></li>
       <li><button id="goldVault">Gold Vault (2000 coins, +20 DPS)</button></li>
       <li><button id="premium1">Premium Rush ($1, +2 DPS)</button></li>
-      <li><button id="premium5">Super Rush ($5, +5 DPS)</button></li>
     </ul>
   </div>
 
@@ -49,7 +48,7 @@
     <h2>Stats</h2>
     <p>Total Clicks: <span id="totalClicks">0</span> | Time Played: <span id="timePlayed">0s</span></p>
     <button id="prestigeBtn">Prestige (Reset for 1.5x Multiplier)</button>
-    <p>Your Referral Code: <span id="referralCode"></span> | <button id="claimReferral">Claim Referral Bonus (50 coins)</button></p>
+    <p>Your Referral Code: <span id="referralCode"></span> <button id="copyReferral">Copy Code</button> | <button id="claimReferral">Claim Referral Bonus (50 coins)</button></p>
   </div>
 
   <div id="achievements">
@@ -101,10 +100,12 @@
     let lastSavedCoins = 0;
     let lastLeaderboardUpdate = 0;
     let achievements = [];
-    let totalClicks = 0;
-    let timePlayed = 0;
+    let totalClicks = parseInt(localStorage.getItem('totalClicks')) || 0;
+    let timePlayed = parseInt(localStorage.getItem('timePlayed')) || 0;
     let referralCode = btoa(username).slice(0, 8);
+    let referralsUsed = [];
     let eventActive = false;
+    let leaderboardCache = [];
 
     async function loadPlayerData() {
       const docRef = db.collection("players").doc(username);
@@ -113,35 +114,39 @@
         const data = doc.data();
         coins = data.coins || 0;
         digsPerSecond = data.digsPerSecond || 0;
-        multiplier = data.multiplier || 1; // Default to 1 if undefined
+        multiplier = data.multiplier || 1;
         achievements = data.achievements || [];
-        totalClicks = data.totalClicks || 0;
-        timePlayed = data.timePlayed || 0;
+        referralsUsed = data.referralsUsed || [];
         lastSavedCoins = coins;
       } else {
-        await docRef.set({ coins: 0, digsPerSecond: 0, multiplier: 1, achievements: [], totalClicks: 0, timePlayed: 0 });
+        await docRef.set({ coins: 0, digsPerSecond: 0, multiplier: 1, achievements: [], referralsUsed: [] });
         lastSavedCoins = 0;
       }
+      leaderboardCache = JSON.parse(localStorage.getItem('leaderboardCache')) || [];
       updateDisplay(true);
       updateAchievements();
       document.getElementById("referralCode").innerText = referralCode;
+      if (!localStorage.getItem('referralExplained')) {
+        alert("Share your referral code with friends! They get 50 coins when they use it, and you get 50 coins too!");
+        localStorage.setItem('referralExplained', 'true');
+      }
     }
 
     async function savePlayerData() {
-      const currentData = (await db.collection("players").doc(username).get()).data();
-      if (coins !== lastSavedCoins || achievements.length !== currentData.achievements?.length || totalClicks !== currentData.totalClicks || timePlayed !== currentData.timePlayed) {
+      if (coins !== lastSavedCoins || achievements.length !== (await db.collection("players").doc(username).get()).data().achievements?.length) {
         await db.collection("players").doc(username).set({
           coins: coins,
           digsPerSecond: digsPerSecond,
           multiplier: multiplier,
           achievements: achievements,
-          totalClicks: totalClicks,
-          timePlayed: timePlayed,
+          referralsUsed: referralsUsed,
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         });
         lastSavedCoins = coins;
-        console.log("Saved to Firestore:", { coins, digsPerSecond, multiplier, achievements, totalClicks, timePlayed });
+        console.log("Saved to Firestore:", { coins, digsPerSecond, multiplier });
       }
+      localStorage.setItem('totalClicks', totalClicks);
+      localStorage.setItem('timePlayed', timePlayed);
     }
 
     function dig() {
@@ -171,11 +176,11 @@
       }
     }
 
-    function goPremium(priceId, dpsBoost) {
+    function goPremium() {
       stripe.redirectToCheckout({
-        lineItems: [{ price: priceId, quantity: 1 }],
+        lineItems: [{ price: 'price_1R8lQcDIy2nI1g7eQdl4RreS', quantity: 1 }],
         mode: 'payment',
-        successUrl: window.location.href + `?premium${dpsBoost}=true`,
+        successUrl: window.location.href + '?premium=true',
         cancelUrl: window.location.href,
       }).then(result => {
         if (result.error) console.error("Stripe error:", result.error.message);
@@ -198,14 +203,30 @@
 
     async function claimReferral() {
       const code = prompt("Enter a referral code:");
-      if (code && code !== referralCode) {
+      if (!code || code === referralCode || referralsUsed.includes(code)) {
+        alert("Invalid, own, or already used code!");
+        return;
+      }
+      const snapshot = await db.collection("players").where("username", "==", atob(code.padEnd(12, "=")).slice(0, -3)).get();
+      if (!snapshot.empty) {
+        const referrerDoc = snapshot.docs[0];
+        const referrerData = referrerDoc.data();
+        await db.collection("players").doc(referrerDoc.id).update({
+          coins: (referrerData.coins || 0) + 50,
+          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
         coins += 50;
+        referralsUsed.push(code);
         updateDisplay(false);
         savePlayerData();
-        alert("Referral bonus claimed: +50 coins!");
+        alert("Referral bonus claimed: +50 coins for you and your friend!");
       } else {
-        alert("Invalid or own code!");
+        alert("Code not found!");
       }
+    }
+
+    function copyReferral() {
+      navigator.clipboard.writeText(referralCode).then(() => alert("Code copied: " + referralCode));
     }
 
     async function updateDisplay(includeLeaderboard = true) {
@@ -217,7 +238,7 @@
 
       if (includeLeaderboard) {
         const now = Date.now();
-        if (now - lastLeaderboardUpdate >= 300000 || !window.autoUpdate) {
+        if (now - lastLeaderboardUpdate >= 600000 || !window.autoUpdate || !leaderboardCache.length) {
           await savePlayerData();
           const leaderboardList = document.getElementById("leaderboardList");
           leaderboardList.innerHTML = "";
@@ -226,19 +247,31 @@
               .orderBy("coins", "desc")
               .limit(5)
               .get();
+            leaderboardCache = [];
             snapshot.forEach(doc => {
               const data = doc.data();
-              const li = document.createElement("li");
-              // Default multiplier to 1 if undefined
               const displayMultiplier = data.multiplier || 1;
-              li.textContent = `${doc.id}: ${Math.floor(data.coins)} coins (x${displayMultiplier.toFixed(1)})`;
+              const entry = `${doc.id}: ${Math.floor(data.coins)} coins (x${displayMultiplier.toFixed(1)})`;
+              leaderboardCache.push(entry);
+              const li = document.createElement("li");
+              li.textContent = entry;
               leaderboardList.appendChild(li);
             });
+            localStorage.setItem('leaderboardCache', JSON.stringify(leaderboardCache));
             lastLeaderboardUpdate = now;
-            console.log("Leaderboard updated successfully");
+            console.log("Leaderboard updated from Firestore");
           } catch (error) {
             console.error("Leaderboard fetch failed:", error);
           }
+        } else {
+          const leaderboardList = document.getElementById("leaderboardList");
+          leaderboardList.innerHTML = "";
+          leaderboardCache.forEach(entry => {
+            const li = document.createElement("li");
+            li.textContent = entry;
+            leaderboardList.appendChild(li);
+          });
+          console.log("Leaderboard loaded from cache");
         }
       }
     }
@@ -279,15 +312,10 @@
       }
     }
 
-    if (window.location.search.includes('premium2=true') && digsPerSecond < 2) {
+    if (window.location.search.includes('premium=true') && digsPerSecond < 2) {
       digsPerSecond = 2;
       savePlayerData();
       alert("Premium Rush activated! +2 DPS!");
-    }
-    if (window.location.search.includes('premium5=true') && digsPerSecond < 5) {
-      digsPerSecond = 5;
-      savePlayerData();
-      alert("Super Rush activated! +5 DPS!");
     }
 
     document.getElementById("gold").addEventListener("click", dig);
@@ -298,10 +326,10 @@
     document.getElementById("autoMiner").addEventListener("click", () => buyUpgrade(100, 1, "Auto-Miner"));
     document.getElementById("megaMiner").addEventListener("click", () => buyUpgrade(500, 5, "Mega-Miner"));
     document.getElementById("goldVault").addEventListener("click", () => buyUpgrade(2000, 20, "Gold Vault"));
-    document.getElementById("premium1").addEventListener("click", () => goPremium('price_1R8lQcDIy2nI1g7eQdl4RreS', 2));
-    document.getElementById("premium5").addEventListener("click", () => goPremium('price_1R8lQcDIy2nI1g7eQdl4RreS', 5));
+    document.getElementById("premium1").addEventListener("click", goPremium);
     document.getElementById("prestigeBtn").addEventListener("click", prestige);
     document.getElementById("claimReferral").addEventListener("click", claimReferral);
+    document.getElementById("copyReferral").addEventListener("click", copyReferral);
     document.getElementById("refreshLeaderboard").addEventListener("click", () => {
       window.autoUpdate = false;
       updateDisplay(true);
@@ -309,18 +337,18 @@
     });
 
     setInterval(async () => {
-      coins += digsPerSecond * 30 * multiplier;
-      timePlayed += 30000;
+      coins += digsPerSecond * 60 * multiplier;
+      timePlayed += 60000;
       checkAchievements();
       startGoldRush();
       await savePlayerData();
       updateDisplay(false);
-    }, 30000);
+    }, 60000);
 
     setInterval(() => {
       window.autoUpdate = true;
       updateDisplay(true);
-    }, 300000);
+    }, 600000);
 
     loadPlayerData();
   </script>
