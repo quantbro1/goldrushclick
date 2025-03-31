@@ -5,20 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GoldRushClick</title>
   <style>
-    body { font-family: 'Courier New', monospace; text-align: center; margin-top: 50px; background-color: #fdf6e3; color: #333; }
+    body { font-family: 'Courier New', monospace; text-align: center; margin: 20px; background-color: #fdf6e3; color: #333; }
     h1 { color: #d4a017; font-size: 36px; }
-    button { padding: 12px 24px; font-size: 18px; margin: 5px; background-color: #d4a017; color: white; border: none; border-radius: 5px; cursor: pointer; outline: none; }
+    button { padding: 10px 20px; font-size: 16px; margin: 5px; background-color: #d4a017; color: white; border: none; border-radius: 5px; cursor: pointer; }
     button:hover { background-color: #b58900; }
     #gold { font-size: 48px; cursor: pointer; transition: transform 0.1s; }
     #gold:hover { transform: scale(1.1); }
-    #ad { margin: 20px auto; max-width: 300px; }
-    p { font-size: 20px; }
-    #leaderboard, #shop, #achievements { margin-top: 20px; }
-    #leaderboard h2, #shop h2, #achievements h2 { font-size: 24px; color: #d4a017; }
-    #leaderboardList, #shopList, #achievementsList { list-style: none; padding: 0; }
-    #leaderboardList li, #shopList li, #achievementsList li { font-size: 18px; margin: 5px 0; }
+    #ad, #shop, #achievements, #leaderboard, #stats { margin-top: 20px; }
+    p { font-size: 18px; }
+    h2 { font-size: 24px; color: #d4a017; }
+    ul { list-style: none; padding: 0; }
+    li { font-size: 16px; margin: 5px 0; }
     .coin-pop { position: absolute; color: #d4a017; font-size: 20px; animation: fadeUp 1s forwards; }
     @keyframes fadeUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }
+    #eventBanner { font-size: 20px; color: #d4a017; font-weight: bold; display: none; }
+    .disabled { background-color: #666; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -26,23 +27,29 @@
   <p>Player: <span id="usernameDisplay">Guest</span></p>
   <p>Coins: <span id="coins">0</span></p>
   <p id="gold">⛏️ Click for Gold!</p>
-  <button id="upgradeBtn">Buy Pickaxe (10 coins)</button>
-  <button id="premiumBtn">Premium Rush ($1)</button>
-  <p>Digs per second: <span id="dps">0</span></p>
-
-  <div id="ad">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8529571438098551" crossorigin="anonymous"></script>
-    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-8529571438098551" data-ad-slot="YOUR_AD_SLOT_HERE"></ins> <!-- Replace with real slot ID -->
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-  </div>
+  <p id="eventBanner"></p>
+  <p>Digs per second: <span id="dps">0</span> | Multiplier: <span id="multiplier">1x</span></p>
 
   <div id="shop">
     <h2>Shop</h2>
     <ul id="shopList">
+      <li><button id="basicPickaxe">Basic Pickaxe (10 coins, +1 DPS)</button></li>
       <li><button id="ironPickaxe">Iron Pickaxe (50 coins, +2 DPS)</button></li>
       <li><button id="goldPickaxe">Gold Pickaxe (200 coins, +5 DPS)</button></li>
+      <li><button id="diamondPickaxe">Diamond Pickaxe (1000 coins, +10 DPS)</button></li>
       <li><button id="autoMiner">Auto-Miner (100 coins, +1 DPS)</button></li>
+      <li><button id="megaMiner">Mega-Miner (500 coins, +5 DPS)</button></li>
+      <li><button id="goldVault">Gold Vault (2000 coins, +20 DPS)</button></li>
+      <li><button id="premium1">Premium Rush ($1, +2 DPS)</button></li>
+      <li><button id="premium5">Super Rush ($5, +5 DPS)</button></li>
     </ul>
+  </div>
+
+  <div id="stats">
+    <h2>Stats</h2>
+    <p>Total Clicks: <span id="totalClicks">0</span> | Time Played: <span id="timePlayed">0s</span></p>
+    <button id="prestigeBtn">Prestige (Reset for 1.5x Multiplier)</button>
+    <p>Your Referral Code: <span id="referralCode"></span> | <button id="claimReferral">Claim Referral Bonus (50 coins)</button></p>
   </div>
 
   <div id="achievements">
@@ -54,6 +61,12 @@
     <h2>Leaderboard</h2>
     <button id="refreshLeaderboard">Refresh Leaderboard</button>
     <ul id="leaderboardList"></ul>
+  </div>
+
+  <div id="ad">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8529571438098551" crossorigin="anonymous"></script>
+    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-8529571438098551" data-ad-slot="YOUR_AD_SLOT_HERE"></ins> <!-- Replace with real slot ID -->
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -84,9 +97,14 @@
 
     let coins = 0;
     let digsPerSecond = 0;
+    let multiplier = 1;
     let lastSavedCoins = 0;
     let lastLeaderboardUpdate = 0;
     let achievements = [];
+    let totalClicks = 0;
+    let timePlayed = 0;
+    let referralCode = btoa(username).slice(0, 8); // Simple unique code
+    let eventActive = false;
 
     async function loadPlayerData() {
       const docRef = db.collection("players").doc(username);
@@ -95,49 +113,59 @@
         const data = doc.data();
         coins = data.coins || 0;
         digsPerSecond = data.digsPerSecond || 0;
+        multiplier = data.multiplier || 1;
         achievements = data.achievements || [];
+        totalClicks = data.totalClicks || 0;
+        timePlayed = data.timePlayed || 0;
         lastSavedCoins = coins;
       } else {
-        await docRef.set({ coins: 0, digsPerSecond: 0, achievements: [] });
+        await docRef.set({ coins: 0, digsPerSecond: 0, multiplier: 1, achievements: [], totalClicks: 0, timePlayed: 0 });
         lastSavedCoins = 0;
       }
       updateDisplay(true);
       updateAchievements();
+      document.getElementById("referralCode").innerText = referralCode;
     }
 
     async function savePlayerData() {
-      if (coins !== lastSavedCoins || achievements.length !== (await db.collection("players").doc(username).get()).data().achievements?.length) {
+      const currentData = (await db.collection("players").doc(username).get()).data();
+      if (coins !== lastSavedCoins || achievements.length !== currentData.achievements?.length || totalClicks !== currentData.totalClicks || timePlayed !== currentData.timePlayed) {
         await db.collection("players").doc(username).set({
           coins: coins,
           digsPerSecond: digsPerSecond,
+          multiplier: multiplier,
           achievements: achievements,
+          totalClicks: totalClicks,
+          timePlayed: timePlayed,
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         });
         lastSavedCoins = coins;
-        console.log("Saved to Firestore:", coins, achievements);
+        console.log("Saved to Firestore:", { coins, digsPerSecond, multiplier, achievements, totalClicks, timePlayed });
       }
     }
 
     function dig() {
-      console.log("Dig clicked!");
-      coins++;
+      const coinGain = eventActive ? 2 * multiplier : multiplier;
+      coins += coinGain;
+      totalClicks++;
       const gold = document.getElementById("gold");
       const pop = document.createElement("div");
       pop.className = "coin-pop";
-      pop.textContent = "+1";
+      pop.textContent = `+${coinGain}`;
       pop.style.left = `${gold.offsetLeft + 20}px`;
       pop.style.top = `${gold.offsetTop - 20}px`;
       document.body.appendChild(pop);
       setTimeout(() => pop.remove(), 1000);
       checkAchievements();
       updateDisplay(false);
+      // Play sound (uncomment if hosted with sound file)
+      // new Audio('click.wav').play();
     }
 
     function buyUpgrade(cost, dpsIncrease, itemName) {
       if (coins >= cost) {
         coins -= cost;
         digsPerSecond += dpsIncrease;
-        console.log(`Bought ${itemName}`);
         checkAchievements();
         updateDisplay(false);
       } else {
@@ -145,30 +173,53 @@
       }
     }
 
-    function goPremium() {
-      console.log("Premium clicked!");
+    function goPremium(priceId, dpsBoost) {
       stripe.redirectToCheckout({
-        lineItems: [{ price: 'price_1R8lQcDIy2nI1g7eQdl4RreS', quantity: 1 }],
+        lineItems: [{ price: priceId, quantity: 1 }],
         mode: 'payment',
-        successUrl: window.location.href + '?premium=true',
+        successUrl: window.location.href + `?premium${dpsBoost}=true`,
         cancelUrl: window.location.href,
-      }).then(function (result) {
-        if (result.error) {
-          console.error("Stripe error:", result.error.message);
-          alert('Checkout failed: ' + result.error.message);
-        }
+      }).then(result => {
+        if (result.error) console.error("Stripe error:", result.error.message);
       });
     }
 
+    function prestige() {
+      if (coins >= 1000) {
+        coins = 0;
+        digsPerSecond = 0;
+        multiplier *= 1.5;
+        achievements.push("Prestige Master");
+        updateDisplay(true);
+        savePlayerData();
+        alert("Prestiged! Multiplier now " + multiplier.toFixed(1) + "x");
+      } else {
+        alert("Need 1000 coins to prestige!");
+      }
+    }
+
+    async function claimReferral() {
+      const code = prompt("Enter a referral code:");
+      if (code && code !== referralCode) {
+        coins += 50;
+        updateDisplay(false);
+        savePlayerData();
+        alert("Referral bonus claimed: +50 coins!");
+      } else {
+        alert("Invalid or own code!");
+      }
+    }
+
     async function updateDisplay(includeLeaderboard = true) {
-      document.getElementById("coins").innerText = coins;
+      document.getElementById("coins").innerText = Math.floor(coins);
       document.getElementById("dps").innerText = digsPerSecond;
+      document.getElementById("multiplier").innerText = multiplier.toFixed(1) + "x";
+      document.getElementById("totalClicks").innerText = totalClicks;
+      document.getElementById("timePlayed").innerText = Math.floor(timePlayed / 1000) + "s";
 
       if (includeLeaderboard) {
-        console.log("Leaderboard updating attempt", Date.now());
         const now = Date.now();
         if (now - lastLeaderboardUpdate >= 300000 || !window.autoUpdate) {
-          console.log("Fetching leaderboard...");
           await savePlayerData();
           const leaderboardList = document.getElementById("leaderboardList");
           leaderboardList.innerHTML = "";
@@ -180,11 +231,10 @@
             snapshot.forEach(doc => {
               const data = doc.data();
               const li = document.createElement("li");
-              li.textContent = `${doc.id}: ${data.coins} coins`;
+              li.textContent = `${doc.id}: ${Math.floor(data.coins)} coins (x${data.multiplier.toFixed(1)})`;
               leaderboardList.appendChild(li);
             });
             lastLeaderboardUpdate = now;
-            console.log("Leaderboard updated successfully");
           } catch (error) {
             console.error("Leaderboard fetch failed:", error);
           }
@@ -195,7 +245,10 @@
     function checkAchievements() {
       const newAchievements = [];
       if (coins >= 100 && !achievements.includes("100 Coins")) newAchievements.push("100 Coins");
+      if (coins >= 1000 && !achievements.includes("Gold Hoarder")) newAchievements.push("Gold Hoarder");
       if (digsPerSecond >= 1 && !achievements.includes("First Upgrade")) newAchievements.push("First Upgrade");
+      if (digsPerSecond >= 20 && !achievements.includes("Mining Pro")) newAchievements.push("Mining Pro");
+      if (totalClicks >= 100 && !achievements.includes("Click Addict")) newAchievements.push("Click Addict");
       if (newAchievements.length) {
         achievements.push(...newAchievements);
         updateAchievements();
@@ -213,18 +266,41 @@
       });
     }
 
-    if (window.location.search.includes('premium=true') && digsPerSecond < 2) {
+    function startGoldRush() {
+      if (!eventActive && Math.random() < 0.05) { // 5% chance every 30s
+        eventActive = true;
+        document.getElementById("eventBanner").textContent = "Gold Rush! 2x Coins for 30s!";
+        document.getElementById("eventBanner").style.display = "block";
+        setTimeout(() => {
+          eventActive = false;
+          document.getElementById("eventBanner").style.display = "none";
+        }, 30000);
+      }
+    }
+
+    if (window.location.search.includes('premium2=true') && digsPerSecond < 2) {
       digsPerSecond = 2;
       savePlayerData();
-      alert("Premium activated! You’re digging at 2/sec!");
+      alert("Premium Rush activated! +2 DPS!");
+    }
+    if (window.location.search.includes('premium5=true') && digsPerSecond < 5) {
+      digsPerSecond = 5;
+      savePlayerData();
+      alert("Super Rush activated! +5 DPS!");
     }
 
     document.getElementById("gold").addEventListener("click", dig);
-    document.getElementById("upgradeBtn").addEventListener("click", () => buyUpgrade(10, 1, "Basic Pickaxe"));
+    document.getElementById("basicPickaxe").addEventListener("click", () => buyUpgrade(10, 1, "Basic Pickaxe"));
     document.getElementById("ironPickaxe").addEventListener("click", () => buyUpgrade(50, 2, "Iron Pickaxe"));
     document.getElementById("goldPickaxe").addEventListener("click", () => buyUpgrade(200, 5, "Gold Pickaxe"));
+    document.getElementById("diamondPickaxe").addEventListener("click", () => buyUpgrade(1000, 10, "Diamond Pickaxe"));
     document.getElementById("autoMiner").addEventListener("click", () => buyUpgrade(100, 1, "Auto-Miner"));
-    document.getElementById("premiumBtn").addEventListener("click", goPremium);
+    document.getElementById("megaMiner").addEventListener("click", () => buyUpgrade(500, 5, "Mega-Miner"));
+    document.getElementById("goldVault").addEventListener("click", () => buyUpgrade(2000, 20, "Gold Vault"));
+    document.getElementById("premium1").addEventListener("click", () => goPremium('price_1R8lQcDIy2nI1g7eQdl4RreS', 2));
+    document.getElementById("premium5").addEventListener("click", () => goPremium('price_1R8lQcDIy2nI1g7eQdl4RreS', 5)); // Replace with real $5 price ID
+    document.getElementById("prestigeBtn").addEventListener("click", prestige);
+    document.getElementById("claimReferral").addEventListener("click", claimReferral);
     document.getElementById("refreshLeaderboard").addEventListener("click", () => {
       window.autoUpdate = false;
       updateDisplay(true);
@@ -232,8 +308,10 @@
     });
 
     setInterval(async () => {
-      coins += digsPerSecond * 30;
+      coins += digsPerSecond * 30 * multiplier;
+      timePlayed += 30000;
       checkAchievements();
+      startGoldRush();
       await savePlayerData();
       updateDisplay(false);
     }, 30000);
