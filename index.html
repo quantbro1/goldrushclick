@@ -94,6 +94,7 @@
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         });
         lastSavedCoins = coins;
+        console.log("Saved to Firestore:", coins);
       }
     }
 
@@ -136,9 +137,10 @@
       if (includeLeaderboard) {
         console.log("Leaderboard updating attempt", Date.now(), "Last update:", lastLeaderboardUpdate);
         const now = Date.now();
-        // Throttle auto-updates (5 mins), but allow manual refresh anytime
         if (now - lastLeaderboardUpdate >= 300000 || !window.autoUpdate) {
           console.log("Fetching leaderboard...");
+          // Save current coins before fetching leaderboard
+          await savePlayerData();
           const leaderboardList = document.getElementById("leaderboardList");
           leaderboardList.innerHTML = "";
           try {
@@ -173,9 +175,9 @@
     document.getElementById("upgradeBtn").addEventListener("click", buyUpgrade);
     document.getElementById("premiumBtn").addEventListener("click", goPremium);
     document.getElementById("refreshLeaderboard").addEventListener("click", () => {
-      window.autoUpdate = false; // Flag manual refresh
+      window.autoUpdate = false;
       updateDisplay(true);
-      window.autoUpdate = true; // Reset for auto-updates
+      window.autoUpdate = true;
     });
 
     setInterval(async () => {
@@ -185,7 +187,7 @@
     }, 30000);
 
     setInterval(() => {
-      window.autoUpdate = true; // Mark as auto-update
+      window.autoUpdate = true;
       updateDisplay(true);
     }, 300000);
 
