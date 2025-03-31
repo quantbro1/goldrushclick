@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoldRushClick</title>
+  <style>
+    body { font-family: 'Courier New', monospace; text-align: center; margin-top: 50px; background-color: #fdf6e3; color: #333; }
+    h1 { color: #d4a017; font-size: 36px; }
+    button { padding: 12px 24px; font-size: 18px; margin: 5px; background-color: #d4a017; color: white; border: none; border-radius: 5px; cursor: pointer; outline: none; }
+    button:hover { background-color: #b58900; }
+    #gold { font-size: 48px; cursor: pointer; transition: transform 0.1s; }
+    #gold:hover { transform: scale(1.1); }
+    #ad { margin: 20px auto; max-width: 300px; }
+    p { font-size: 20px; }
+    #leaderboard { margin-top: 20px; }
+    #leaderboard h2 { font-size: 24px; color: #d4a017; }
+    #leaderboardList { list-style: none; padding: 0; }
+    #leaderboardList li { font-size: 18px; margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>GoldRushClick</h1>
+  <p>Player: <span id="usernameDisplay">Guest</span></p>
+  <p>Coins: <span id="coins">0</span></p>
+  <p id="gold">⛏️ Click for Gold!</p>
+  <button id="upgradeBtn">Buy Pickaxe (10 coins)</button>
+  <button id="premiumBtn">Premium Rush ($1)</button>
+  <p>Digs per second: <span id="dps">0</span></p>
+
+  <div id="ad">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8529571438098551" crossorigin="anonymous"></script>
+    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-8529571438098551" data-ad-slot="1234567890"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <div id="leaderboard">
+    <h2>Leaderboard</h2>
+    <ul id="leaderboardList"></ul>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    console.log("Script loaded!");
+    const stripe = Stripe('pk_test_51R8lPYDIy2nI1g7e4FE9TCBdq4i6ui8BTzkh2IwBlb8Mj2bNEELO19sZrRwPTacbTBzBKSEoL6aDdEr4Adk2h8tP00kuMmFyoM');
+
+    const firebaseConfig = {
+      apiKey: typeof process !== 'undefined' && process.env.FIREBASE_API_KEY ? process.env.FIREBASE_API_KEY : "MISSING_API_KEY",
+      authDomain: "goldrushclick.firebaseapp.com",
+      projectId: "goldrushclick",
+      storageBucket: "goldrushclick.firebasestorage.app",
+      messagingSenderId: "43423974817",
+      appId: "1:43423974817:web:7ed559d67001e9a739b7e0",
+      measurementId: "G-YQRFZ1DZBR"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let username = localStorage.getItem('username');
+    if (!username) {
+      username = prompt("Enter your username:") || "Guest_" + Math.floor(Math.random() * 1000);
+      localStorage.setItem('username', username);
+    }
+    document.getElementById("usernameDisplay").innerText = username;
+
+    let coins = 0;
+    let digsPerSecond = 0;
+
+    async function loadPlayerData() {
+      const docRef = db.collection("players").doc(username);
+      const doc = await docRef.get();
+      if (doc.exists) {
+        const data = doc.data();
+        coins = data.coins || 0;
+        digsPerSecond = data.digsPerSecond || 0;
+      } else {
+        await docRef.set({ coins: 0, digsPerSecond: 0 });
+      }
+      updateDisplay();
+    }
+
+    async function savePlayerData() {
+      await db.collection("players").doc(username).set({
+        coins: coins,
+        digsPerSecond: digsPerSecond,
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    function dig() {
+      console.log("Dig clicked!");
+      coins++;
+      savePlayerData();
+      updateDisplay();
+    }
+
+    function buyUpgrade() {
+      console.log("Upgrade clicked!");
+      if (coins >= 10) {
+        coins -= 10;
+        digsPerSecond++;
+        savePlayerData();
+        updateDisplay();
+      } else {
+        alert("Not enough coins! Keep digging!");
+      }
+    }
+
+    function goPremium() {
+      console.log("Premium clicked!");
+      stripe.redirectToCheckout({
+        lineItems: [{ price: 'price_1R8lQcDIy2nI1g7eQdl4RreS', quantity: 1 }],
+        mode: 'payment',
+        successUrl: window.location.href + '?premium=true',
+        cancelUrl: window.location.href,
+      }).then(function (result) {
+        if (result.error) {
+          console.error("Stripe error:", result.error.message);
+          alert('Checkout failed: ' + result.error.message);
+        }
+      });
+    }
+
+    async function updateDisplay() {
+      document.getElementById("coins").innerText = coins;
+      document.getElementById("dps").innerText = digsPerSecond;
+
+      const leaderboardList = document.getElementById("leaderboardList");
+      leaderboardList.innerHTML = "";
+      const snapshot = await db.collection("players")
+        .orderBy("coins", "desc")
+        .limit(5)
+        .get();
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.textContent = `${doc.id}: ${data.coins} coins`;
+        leaderboardList.appendChild(li);
+      });
+    }
+
+    if (window.location.search.includes('premium=true') && digsPerSecond < 2) {
+      digsPerSecond = 2;
+      savePlayerData();
+      alert("Premium activated! You’re digging at 2/sec!");
+    }
+
+    document.getElementById("gold").addEventListener("click", dig);
+    document.getElementById("upgradeBtn").addEventListener("click", buyUpgrade);
+    document.getElementById("premiumBtn").addEventListener("click", goPremium);
+
+    setInterval(async () => {
+      coins += digsPerSecond;
+      await savePlayerData();
+      updateDisplay();
+    }, 1000);
+
+    loadPlayerData();
+  </script>
+</body>
+</html>
