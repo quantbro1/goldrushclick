@@ -24,6 +24,8 @@
     #footer { margin-top: 20px; font-size: 14px; }
     #footer a { color: #d4a017; text-decoration: none; margin: 0 10px; }
     #footer a:hover { text-decoration: underline; }
+    .progress-bar { width: 200px; height: 20px; background: #ccc; margin: 10px auto; border: 1px solid #333; }
+    .progress-fill { height: 100%; background: #d4a017; transition: width 0.3s; }
   </style>
 </head>
 <body>
@@ -34,6 +36,10 @@
   <p id="eventBanner"></p>
   <p>Digs per second: <span id="dps">0</span> | Multiplier: <span id="multiplier">1x</span></p>
   <button id="showInstructions">How to Play</button>
+  <div class="progress-bar"><div class="progress-fill" id="coinProgress" style="width: 0%;"></div></div>
+  <p>Next Achievement: 100 Coins</p>
+  <div class="progress-bar"><div class="progress-fill" id="prestigeProgress" style="width: 0%;"></div></div>
+  <p>Prestige: 1000 Coins</p>
 
   <div id="shop">
     <h2>Shop</h2>
@@ -82,7 +88,7 @@
       <li><strong>Premium Rush</strong>: Pay $1 to boost your DPS by 2—perfect for a quick jump.</li>
       <li><strong>Prestige</strong>: Once you hit 1000 coins, reset your progress for a 1.5x multiplier—stack it up for huge gains!</li>
       <li><strong>Refer Friends</strong>: Share your referral code (in Stats). When they use it, you both get 50 coins.</li>
-      <li><strong>Events</strong>: Watch for random "Gold Rush" events—double coins for 30 seconds!</li>
+      <li><strong>Events</strong>: Watch for "Gold Rush" (2x coins, 30s) or "Coin Shower" (10x coins, 10s) events—stack them for crazy rewards!</li>
       <li><strong>Achievements</strong>: Earn badges like "100 Coins" or "Click Addict" as you play.</li>
       <li><strong>Leaderboard</strong>: Climb the ranks—top 5 players show off their coins and multipliers.</li>
     </ul>
@@ -159,6 +165,7 @@
     let referralCode = btoa(username).slice(0, 8);
     let referralsUsed = [];
     let eventActive = false;
+    let showerActive = false;
     let leaderboardCache = [];
 
     async function loadPlayerData() {
@@ -204,7 +211,7 @@
     }
 
     function dig() {
-      const coinGain = eventActive ? 2 * multiplier : multiplier;
+      const coinGain = (eventActive ? 2 : 1) * (showerActive ? 10 : 1) * multiplier;
       coins += coinGain;
       totalClicks++;
       const gold = document.getElementById("gold");
@@ -217,6 +224,7 @@
       setTimeout(() => pop.remove(), 1000);
       checkAchievements();
       updateDisplay(false);
+      new Audio('https://www.myinstants.com/media/sounds/coin.wav').play(); // Free coin sound
     }
 
     function buyUpgrade(cost, dpsIncrease, itemName) {
@@ -289,6 +297,8 @@
       document.getElementById("multiplier").innerText = multiplier.toFixed(1) + "x";
       document.getElementById("totalClicks").innerText = totalClicks;
       document.getElementById("timePlayed").innerText = Math.floor(timePlayed / 1000) + "s";
+      document.getElementById("coinProgress").style.width = `${Math.min((coins / 100) * 100, 100)}%`;
+      document.getElementById("prestigeProgress").style.width = `${Math.min((coins / 1000) * 100, 100)}%`;
 
       if (includeLeaderboard) {
         const now = Date.now();
@@ -359,10 +369,24 @@
         eventActive = true;
         document.getElementById("eventBanner").textContent = "Gold Rush! 2x Coins for 30s!";
         document.getElementById("eventBanner").style.display = "block";
+        new Audio('https://www.myinstants.com/media/sounds/level-up.mp3').play(); // Free jingle
         setTimeout(() => {
           eventActive = false;
           document.getElementById("eventBanner").style.display = "none";
         }, 30000);
+      }
+    }
+
+    function startCoinShower() {
+      if (!showerActive && Math.random() < 0.02) { // 2% chance every 60s
+        showerActive = true;
+        document.getElementById("eventBanner").textContent = "Coin Shower! 10x Coins for 10s!";
+        document.getElementById("eventBanner").style.display = "block";
+        new Audio('https://www.myinstants.com/media/sounds/power-up.mp3').play(); // Free jingle
+        setTimeout(() => {
+          showerActive = false;
+          if (!eventActive) document.getElementById("eventBanner").style.display = "none";
+        }, 10000);
       }
     }
 
@@ -398,6 +422,7 @@
       timePlayed += 60000;
       checkAchievements();
       startGoldRush();
+      startCoinShower();
       await savePlayerData();
       updateDisplay(false);
     }, 60000);
