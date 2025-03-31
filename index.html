@@ -67,6 +67,8 @@
 
     let coins = 0;
     let digsPerSecond = 0;
+    let lastSavedCoins = 0; // Track last saved state for batching
+    let lastLeaderboardUpdate = 0; // Timestamp for leaderboard throttling
 
     async function loadPlayerData() {
       const docRef = db.collection("players").doc(username);
@@ -75,25 +77,29 @@
         const data = doc.data();
         coins = data.coins || 0;
         digsPerSecond = data.digsPerSecond || 0;
+        lastSavedCoins = coins;
       } else {
         await docRef.set({ coins: 0, digsPerSecond: 0 });
+        lastSavedCoins = 0;
       }
-      updateDisplay();
+      updateDisplay(false); // No leaderboard on load
     }
 
     async function savePlayerData() {
-      await db.collection("players").doc(username).set({
-        coins: coins,
-        digsPerSecond: digsPerSecond,
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      if (coins !== lastSavedCoins) { // Only save if coins changed
+        await db.collection("players").doc(username).set({
+          coins: coins,
+          digsPerSecond: digsPerSecond,
+          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        lastSavedCoins = coins;
+      }
     }
 
     function dig() {
       console.log("Dig clicked!");
       coins++;
-      savePlayerData();
-      updateDisplay();
+      updateDisplay(false); // No leaderboard here
     }
 
     function buyUpgrade() {
@@ -101,8 +107,7 @@
       if (coins >= 10) {
         coins -= 10;
         digsPerSecond++;
-        savePlayerData();
-        updateDisplay();
+        updateDisplay(false); // No leaderboard
       } else {
         alert("Not enough coins! Keep digging!");
       }
@@ -123,22 +128,28 @@
       });
     }
 
-    async function updateDisplay() {
+    async function updateDisplay(includeLeaderboard = true) {
       document.getElementById("coins").innerText = coins;
       document.getElementById("dps").innerText = digsPerSecond;
 
-      const leaderboardList = document.getElementById("leaderboardList");
-      leaderboardList.innerHTML = "";
-      const snapshot = await db.collection("players")
-        .orderBy("coins", "desc")
-        .limit(5)
-        .get();
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const li = document.createElement("li");
-        li.textContent = `${doc.id}: ${data.coins} coins`;
-        leaderboardList.appendChild(li);
-      });
+      if (includeLeaderboard) {
+        const now = Date.now();
+        if (now - lastLeaderboardUpdate >= 300000) { // 5 mins = 300,000 ms
+          const leaderboardList = document.getElementById("leaderboardList");
+          leaderboardList.innerHTML = "";
+          const snapshot = await db.collection("players")
+            .orderBy("coins", "desc")
+            .limit(5)
+            .get();
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const li = document.createElement("li");
+            li.textContent = `${doc.id}: ${data.coins} coins`;
+            leaderboardList.appendChild(li);
+          });
+          lastLeaderboardUpdate = now;
+        }
+      }
     }
 
     if (window.location.search.includes('premium=true') && digsPerSecond < 2) {
@@ -151,11 +162,17 @@
     document.getElementById("upgradeBtn").addEventListener("click", buyUpgrade);
     document.getElementById("premiumBtn").addEventListener("click", goPremium);
 
+    // Batch auto-dig and save every 30 seconds
     setInterval(async () => {
-      coins += digsPerSecond;
+      coins += digsPerSecond * 30; // Accumulate 30 secs of digs
       await savePlayerData();
-      updateDisplay();
-    }, 1000);
+      updateDisplay(false); // No leaderboard
+    }, 30000);
+
+    // Leaderboard refresh every 5 minutes (standalone)
+    setInterval(() => {
+      updateDisplay(true);
+    }, 300000);
 
     loadPlayerData();
   </script>
