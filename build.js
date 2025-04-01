@@ -16,3 +16,16 @@ html = html.replace("FIREBASE_API_KEY_PLACEHOLDER", apiKey);
 fs.writeFileSync(distPath, html);
 
 console.log('Build complete. API key injected:', apiKey === "MISSING_API_KEY" ? "Missing" : "Present");
+
+const fs = require('fs-extra');
+const path = require('path');
+
+const srcDir = 'src';
+const imgDir = 'images';
+const distDir = 'dist';
+
+fs.emptyDirSync(distDir);
+fs.copySync(srcDir, distDir, { filter: src => !src.includes('node_modules') });
+fs.copySync(imgDir, path.join(distDir, 'images'), { overwrite: true });
+
+console.log('Build complete! Files in dist:', fs.readdirSync(distDir));
