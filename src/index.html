@@ -6,9 +6,9 @@
   <title>GoldRushClick</title>
   <link 
     rel="icon" 
-    type="image/png" 
-    href="/images/pickaxe-16.png"
-    onerror="console.error('Favicon failed to load at /images/pickaxe-16.png')"
+    type="image/x-icon" 
+    href="/images/pickaxe-16.ico"
+    onerror="console.error('Favicon failed to load at /images/pickaxe-16.ico'); this.href='/images/pickaxe-16.png'; this.type='image/png';"
   >
   <style>
     body { font-family: 'Courier New', monospace; margin: 0; background-color: #fdf6e3; color: #333; }
@@ -27,7 +27,7 @@
     #eventBanner { font-size: 20px; color: #d4a017; font-weight: bold; display: none; }
     .progress-bar { width: 200px; height: 20px; background: #ccc; margin: 10px auto; border: 1px solid #333; }
     .progress-fill { height: 100%; background: #d4a017; transition: width 0.3s; }
-    #footer { margin-top: 20px; font-size: 14px; position: relative; z-index: 800; }
+    #footer { margin-top: 20px; font-size: 14px; position: fixed; bottom: 0; width: 100%; z-index: 800; background: #fdf6e3; }
     #footer a { color: #d4a017; text-decoration: none; margin: 0 10px; }
     ul { list-style: none; padding: 0; }
     li { margin: 5px 0; }
@@ -98,7 +98,7 @@
       #loginPage input { width: 100%; padding: 8px; box-sizing: border-box; }
       #friendEmail, #chatInput { width: 70%; padding: 8px; box-sizing: border-box; }
       #sendFriendRequest, #sendChat { padding: 8px 12px; }
-      #footer { font-size: 12px; }
+      #footer { font-size: 12px; position: fixed; bottom: 0; width: 100%; }
       #footer a { margin: 0 5px; }
       #authBox { top: 5px; right: 5px; font-size: 12px; }
       #authBox button { padding: 4px 8px; font-size: 12px; }
@@ -402,19 +402,25 @@
 
     function showPopup(popupId) {
       const loginPage = document.getElementById("loginPage");
-      if (loginPage.classList.contains('active')) {
-        loginPage.style.display = "none"; // Hide login completely for popup
+      const wasActive = loginPage.classList.contains('active');
+      if (wasActive) {
+        loginPage.style.display = "none";
+        loginPage.classList.remove('active');
       }
-      document.getElementById(popupId).style.display = "block";
+      const popup = document.getElementById(popupId);
+      popup.style.display = "block";
+      popup.dataset.wasLoginActive = wasActive ? "true" : "false"; // Store state
     }
 
     function hidePopup(popupId) {
-      document.getElementById(popupId).style.display = "none";
+      const popup = document.getElementById(popupId);
+      popup.style.display = "none";
       const loginPage = document.getElementById("loginPage");
-      if (!user) { // Only show login again if not logged in
+      if (!user && popup.dataset.wasLoginActive === "true") {
         loginPage.style.display = "block";
         loginPage.classList.add('active');
       }
+      delete popup.dataset.wasLoginActive;
     }
 
     function dig() {
