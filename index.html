@@ -169,7 +169,7 @@
   <script>
     const stripe = Stripe('pk_test_51R8lPYDIy2nI1g7e4FE9TCBdq4i6ui8BTzkh2IwBlb8Mj2bNEELO19sZrRwPTacbTBzBKSEoL6aDdEr4Adk2h8tP00kuMmFyoM');
     const firebaseConfig = {
-      apiKey: typeof process !== 'undefined' && process.env.FIREBASE_API_KEY ? process.env.FIREBASE_API_KEY : "MISSING_API_KEY",
+      apiKey: "FIREBASE_API_KEY_PLACEHOLDER", // This gets replaced during build
       authDomain: "goldrushclick.firebaseapp.com",
       projectId: "goldrushclick",
       storageBucket: "goldrushclick.firebasestorage.app",
@@ -177,7 +177,6 @@
       appId: "1:43423974817:web:7ed559d67001e9a739b7e0",
       measurementId: "G-YQRFZ1DZBR"
     };
-
     // Check if API key is missing
     if (firebaseConfig.apiKey === "MISSING_API_KEY") {
       console.error("Firebase API key is missing. Set FIREBASE_API_KEY in Netlify environment variables.");
