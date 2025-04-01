@@ -239,6 +239,7 @@
           chatMessages: [], email: userCredential.user.email,
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         });
+        console.log("Player doc created with email:", userCredential.user.email);
       } catch (error) {
         console.error("Registration failed:", error);
         alert("Registration failed: " + error.message);
@@ -395,18 +396,21 @@
 
     async function sendFriendRequest() {
       const friendEmail = document.getElementById("friendEmail").value.trim();
+      console.log("Searching for email:", friendEmail);
       if (!friendEmail || friendEmail === user.email) {
         alert("Enter a valid friend’s email!");
         return;
       }
       try {
         const friendSnapshot = await db.collection("players").where("email", "==", friendEmail).limit(1).get();
+        console.log("Friend snapshot size:", friendSnapshot.size);
         if (friendSnapshot.empty) {
           alert("User not found!");
           return;
         }
         const friendDoc = friendSnapshot.docs[0];
         const friendUid = friendDoc.id;
+        console.log("Found friend UID:", friendUid);
         const requestId = `${user.uid}_${friendUid}`;
         await db.collection("friend_requests").doc(requestId).set({
           senderUid: user.uid,
