@@ -8,10 +8,11 @@
     rel="icon" 
     type="image/png" 
     href="/images/pickaxe-16.png"
+    onerror="console.error('Favicon failed to load at /images/pickaxe-16.png')"
   >
   <style>
     body { font-family: 'Courier New', monospace; margin: 0; background-color: #fdf6e3; color: #333; }
-    nav { background: #d4a017; padding: 10px; text-align: center; }
+    nav { background: #d4a017; padding: 10px; text-align: center; position: relative; }
     nav a { color: white; margin: 0 15px; text-decoration: none; }
     nav a:hover { text-decoration: underline; }
     .page { display: none; text-align: center; padding: 20px; }
@@ -59,6 +60,14 @@
       overflow-y: auto; 
       z-index: 1000; 
     }
+    #authBox { 
+      position: absolute; 
+      top: 10px; 
+      right: 10px; 
+      color: white; 
+      font-size: 14px; 
+    }
+    #authBox button { padding: 5px 10px; font-size: 14px; }
 
     /* Mobile optimizations */
     @media (max-width: 768px) {
@@ -91,6 +100,8 @@
       #sendFriendRequest, #sendChat { padding: 8px 12px; }
       #footer { font-size: 12px; }
       #footer a { margin: 0 5px; }
+      #authBox { top: 5px; right: 5px; font-size: 12px; }
+      #authBox button { padding: 4px 8px; font-size: 12px; }
     }
 
     @media (max-width: 480px) {
@@ -98,6 +109,7 @@
       h1 { font-size: 20px; }
       button { min-width: 80px; }
       #gold { font-size: 30px; }
+      #authBox { position: static; margin-top: 10px; text-align: center; }
     }
   </style>
 </head>
@@ -119,6 +131,10 @@
     <a href="#" onclick="showPage('shop')">Shop</a>
     <a href="#" onclick="showPage('events')">Events</a>
     <a href="#" onclick="showPage('lore')">Lore</a>
+    <div id="authBox">
+      <span id="authStatus">Guest</span>
+      <button id="authToggle" onclick="toggleAuth()">Sign In</button>
+    </div>
   </nav>
 
   <div id="home" class="page">
@@ -144,7 +160,6 @@
     <p>Total Clicks: <span id="totalClicks">0</span> | Time Played: <span id="timePlayed">0s</span></p>
     <p>Pickaxe Skin: <span id="skin">Default</span></p>
     <button id="buyGoldenSkin">Buy Golden Skin (500 coins)</button>
-    <button id="logoutBtn">Logout</button>
   </div>
 
   <div id="quests" class="page">
@@ -213,7 +228,7 @@
       <li><strong>Contact</strong>: GitHub repo.</li>
     </ul>
     <p>Last updated: April 1, 2025.</p>
-    <button onclick="document.getElementById('privacy').style.display='none'">Close</button>
+    <button onclick="hidePopup('privacy')">Close</button>
   </div>
 
   <div id="terms">
@@ -227,7 +242,7 @@
       <li><strong>Liability</strong>: Play at your own risk.</li>
     </ul>
     <p><a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub</a>. Last updated: April 1, 2025.</p>
-    <button onclick="document.getElementById('terms').style.display='none'">Close</button>
+    <button onclick="hidePopup('terms')">Close</button>
   </div>
 
   <div id="footer">
@@ -274,6 +289,9 @@
         console.log("User logged in:", username, "UID:", user.uid);
         await loadData();
         document.getElementById("loginPage").style.display = "none";
+        document.getElementById("loginPage").classList.remove('active');
+        document.getElementById("authStatus").textContent = username;
+        document.getElementById("authToggle").textContent = "Sign Out";
         showPage('home');
         updateLeaderboard();
         updateFriends();
@@ -284,6 +302,8 @@
         console.log("User logged out");
         document.getElementById("loginPage").style.display = "block";
         document.getElementById("loginPage").classList.add('active');
+        document.getElementById("authStatus").textContent = "Guest";
+        document.getElementById("authToggle").textContent = "Sign In";
         document.querySelectorAll('.page:not(#loginPage)').forEach(page => page.classList.remove('active'));
       }
     });
@@ -322,6 +342,15 @@
       await saveData();
       await auth.signOut();
       alert("Logged out!");
+    }
+
+    function toggleAuth() {
+      if (user) {
+        logout();
+      } else {
+        document.getElementById("loginPage").style.display = "block";
+        document.getElementById("loginPage").classList.add('active');
+      }
     }
 
     async function loadData() {
@@ -372,8 +401,20 @@
     }
 
     function showPopup(popupId) {
-      document.getElementById("loginPage").style.zIndex = "800"; // Lower login z-index
+      const loginPage = document.getElementById("loginPage");
+      if (loginPage.classList.contains('active')) {
+        loginPage.style.display = "none"; // Hide login completely for popup
+      }
       document.getElementById(popupId).style.display = "block";
+    }
+
+    function hidePopup(popupId) {
+      document.getElementById(popupId).style.display = "none";
+      const loginPage = document.getElementById("loginPage");
+      if (!user) { // Only show login again if not logged in
+        loginPage.style.display = "block";
+        loginPage.classList.add('active');
+      }
     }
 
     function dig() {
@@ -628,7 +669,6 @@
     document.getElementById("gold").addEventListener("click", dig);
     document.getElementById("loginBtn").addEventListener("click", login);
     document.getElementById("registerBtn").addEventListener("click", register);
-    document.getElementById("logoutBtn").addEventListener("click", logout);
     document.getElementById("buyBasicPickaxe").addEventListener("click", () => buyUpgrade(20, 1, "Basic Pickaxe"));
     document.getElementById("buyGoldVault").addEventListener("click", () => buyUpgrade(2000, 100, "Gold Vault"));
     document.getElementById("buyPremium").addEventListener("click", goPremium);
