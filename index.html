@@ -26,7 +26,8 @@
     #footer a { color: #d4a017; text-decoration: none; margin: 0 10px; }
     ul { list-style: none; padding: 0; }
     li { margin: 5px 0; }
-    #loginPage { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 2px solid #d4a017; }
+    #loginPage, #instructions, #privacy, #terms { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 2px solid #d4a017; max-width: 500px; max-height: 80%; overflow-y: auto; }
+    #loginPage.active { display: block; }
   </style>
 </head>
 <body>
@@ -53,6 +54,7 @@
     <h1>Welcome to GoldRushClick!</h1>
     <p>Dig for gold, complete quests, and rise to the top!</p>
     <button onclick="showPage('game')">Start Digging</button>
+    <button onclick="document.getElementById('instructions').style.display='block'">How to Play</button>
   </div>
 
   <div id="game" class="page">
@@ -112,9 +114,52 @@
     <p id="loreUnlock">Unlock more by reaching Level 5!</p>
   </div>
 
+  <div id="instructions">
+    <h2>How to Play GoldRushClick</h2>
+    <p>Welcome to GoldRushClick! Here’s how to get started:</p>
+    <ul style="text-align: left;">
+      <li><strong>Click for Gold</strong>: Click the "⛏️ Click for Gold!" text to earn coins.</li>
+      <li><strong>Buy Upgrades</strong>: Spend coins in the Shop to boost your Digs per Second (DPS). Start with a Basic Pickaxe (20 coins) or go big with a Gold Vault (2000 coins)!</li>
+      <li><strong>Premium Rush</strong>: Pay $1 for a +200 DPS boost—best bang for your buck!</li>
+      <li><strong>Quests</strong>: Complete tasks like "Click 100 times" for extra coins.</li>
+      <li><strong>Events</strong>: Catch "Gold Fever" (5x coins, 20s) for huge gains!</li>
+      <li><strong>Level Up</strong>: Earn XP per click to unlock lore and bragging rights.</li>
+      <li><strong>Community</strong>: Chat, check the leaderboard, and soon, add friends!</li>
+    </ul>
+    <button onclick="document.getElementById('instructions').style.display='none'">Close</button>
+  </div>
+
+  <div id="privacy">
+    <h2>Privacy Policy</h2>
+    <p>This website is owned and operated by Quantbro Corp. We care about your privacy. Here’s the basics:</p>
+    <ul style="text-align: left;">
+      <li><strong>Data We Collect</strong>: Your email (for login), game progress (coins, DPS, etc.), and chat messages are stored to make the game work.</li>
+      <li><strong>How We Use It</strong>: Only to run the game and show leaderboards—nothing shady.</li>
+      <li><strong>Sharing</strong>: We don’t sell or share your data, except with Firebase (database) and Stripe (payments) to keep things running.</li>
+      <li><strong>Cookies</strong>: Just local storage for some stats—no tracking cookies.</li>
+      <li><strong>Contact</strong>: Questions? Hit us up via the game’s GitHub.</li>
+    </ul>
+    <p>This policy might change—check back here. Last updated: April 1, 2025.</p>
+    <button onclick="document.getElementById('privacy').style.display='none'">Close</button>
+  </div>
+
+  <div id="terms">
+    <h2>Terms of Service</h2>
+    <p>This website is owned and operated by Quantbro Corp. By playing GoldRushClick, you agree to these rules:</p>
+    <ul style="text-align: left;">
+      <li><strong>Use</strong>: Play fair—no cheating or hacking.</li>
+      <li><strong>Payments</strong>: $1 Premium Rush is non-refundable—processed via Stripe.</li>
+      <li><strong>Data</strong>: We store your game info—see Privacy Policy.</li>
+      <li><strong>Changes</strong>: We can update the game or these terms anytime.</li>
+      <li><strong>Liability</strong>: We’re not responsible if the game breaks or you lose progress—play at your own risk.</li>
+    </ul>
+    <p>Questions? Check the <a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub repo</a>. Last updated: April 1, 2025.</p>
+    <button onclick="document.getElementById('terms').style.display='none'">Close</button>
+  </div>
+
   <div id="footer">
-    <a href="#" onclick="alert('This website is owned and operated by Quantbro Corp. See Privacy Policy.')">Privacy Policy</a>
-    <a href="#" onclick="alert('This website is owned and operated by Quantbro Corp. See Terms of Service.')">Terms of Service</a>
+    <a href="#" onclick="document.getElementById('privacy').style.display='block'; return false;">Privacy Policy</a>
+    <a href="#" onclick="document.getElementById('terms').style.display='block'; return false;">Terms of Service</a>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -124,7 +169,7 @@
   <script>
     const stripe = Stripe('pk_test_51R8lPYDIy2nI1g7e4FE9TCBdq4i6ui8BTzkh2IwBlb8Mj2bNEELO19sZrRwPTacbTBzBKSEoL6aDdEr4Adk2h8tP00kuMmFyoM');
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY", // Replace with your Firebase API key
+      apiKey: typeof process !== 'undefined' && process.env.FIREBASE_API_KEY ? process.env.FIREBASE_API_KEY : "MISSING_API_KEY",
       authDomain: "goldrushclick.firebaseapp.com",
       projectId: "goldrushclick",
       storageBucket: "goldrushclick.firebasestorage.app",
@@ -132,6 +177,13 @@
       appId: "1:43423974817:web:7ed559d67001e9a739b7e0",
       measurementId: "G-YQRFZ1DZBR"
     };
+
+    // Check if API key is missing
+    if (firebaseConfig.apiKey === "MISSING_API_KEY") {
+      console.error("Firebase API key is missing. Set FIREBASE_API_KEY in Netlify environment variables.");
+      alert("Game won’t work properly—API key missing! Check console for details.");
+    }
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
@@ -144,7 +196,7 @@
     auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
         user = firebaseUser;
-        username = firebaseUser.email.split('@')[0]; // Use email prefix as username
+        username = firebaseUser.email.split('@')[0];
         await loadData();
         document.getElementById("loginPage").style.display = "none";
         showPage('home');
@@ -414,13 +466,10 @@
       }
     }, 1000);
 
-    // Leaderboard Update (every 60 seconds)
+    // Leaderboard Update
     setInterval(() => {
       if (user) updateLeaderboard();
     }, 60000);
-
-    // Initial Load
-    // loadData() is called after auth state changes
   </script>
 </body>
 </html>
