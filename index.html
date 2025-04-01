@@ -26,9 +26,18 @@
     #footer a { color: #d4a017; text-decoration: none; margin: 0 10px; }
     ul { list-style: none; padding: 0; }
     li { margin: 5px 0; }
+    #loginPage { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 2px solid #d4a017; }
   </style>
 </head>
 <body>
+  <div id="loginPage" class="page active">
+    <h1>GoldRushClick Login</h1>
+    <p>Email: <input id="emailInput" type="email" placeholder="example@email.com"></p>
+    <p>Password: <input id="passwordInput" type="password" placeholder="Password"></p>
+    <button id="loginBtn">Login</button>
+    <button id="registerBtn">Register</button>
+  </div>
+
   <nav>
     <a href="#" onclick="showPage('home')">Home</a>
     <a href="#" onclick="showPage('game')">Game</a>
@@ -40,7 +49,7 @@
     <a href="#" onclick="showPage('lore')">Lore</a>
   </nav>
 
-  <div id="home" class="page active">
+  <div id="home" class="page">
     <h1>Welcome to GoldRushClick!</h1>
     <p>Dig for gold, complete quests, and rise to the top!</p>
     <button onclick="showPage('game')">Start Digging</button>
@@ -62,6 +71,7 @@
     <p>Total Clicks: <span id="totalClicks">0</span> | Time Played: <span id="timePlayed">0s</span></p>
     <p>Pickaxe Skin: <span id="skin">Default</span></p>
     <button id="buyGoldenSkin">Buy Golden Skin (500 coins)</button>
+    <button id="logoutBtn">Logout</button>
   </div>
 
   <div id="quests" class="page">
@@ -109,6 +119,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://js.stripe.com/v3/"></script>
   <script>
     const stripe = Stripe('pk_test_51R8lPYDIy2nI1g7e4FE9TCBdq4i6ui8BTzkh2IwBlb8Mj2bNEELO19sZrRwPTacbTBzBKSEoL6aDdEr4Adk2h8tP00kuMmFyoM');
@@ -123,14 +134,56 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    let username = localStorage.getItem('username') || "Guest_" + Math.floor(Math.random() * 1000);
-    localStorage.setItem('username', username);
+    let user = null;
+    let username = "Guest";
     let coins = 0, dps = 0, multiplier = 1, xp = 0, level = 1, totalClicks = 0, timePlayed = 0;
     let skin = "Default", eventActive = false, dailyDay = 1, chatMessages = [];
 
+    auth.onAuthStateChanged(async (firebaseUser) => {
+      if (firebaseUser) {
+        user = firebaseUser;
+        username = firebaseUser.email.split('@')[0]; // Use email prefix as username
+        await loadData();
+        document.getElementById("loginPage").style.display = "none";
+        showPage('home');
+      } else {
+        user = null;
+        username = "Guest";
+        document.getElementById("loginPage").style.display = "block";
+        document.querySelectorAll('.page:not(#loginPage)').forEach(page => page.classList.remove('active'));
+      }
+    });
+
+    async function login() {
+      const email = document.getElementById("emailInput").value;
+      const password = document.getElementById("passwordInput").value;
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (error) {
+        alert("Login failed: " + error.message);
+      }
+    }
+
+    async function register() {
+      const email = document.getElementById("emailInput").value;
+      const password = document.getElementById("passwordInput").value;
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+      } catch (error) {
+        alert("Registration failed: " + error.message);
+      }
+    }
+
+    async function logout() {
+      await auth.signOut();
+      alert("Logged out successfully!");
+    }
+
     async function loadData() {
-      const doc = await db.collection("players").doc(username).get();
+      if (!user) return;
+      const doc = await db.collection("players").doc(user.uid).get();
       if (doc.exists) {
         const data = doc.data();
         coins = data.coins || 0;
@@ -151,13 +204,15 @@
     }
 
     async function saveData() {
-      await db.collection("players").doc(username).set({
+      if (!user) return;
+      await db.collection("players").doc(user.uid).set({
         coins, digsPerSecond: dps, multiplier, xp, level, totalClicks, timePlayed, skin, dailyDay, chatMessages,
         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
       });
     }
 
     function showPage(pageId) {
+      if (!user) return;
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
       updateDisplay();
@@ -291,7 +346,7 @@
       snapshot.forEach(doc => {
         const data = doc.data();
         const li = document.createElement("li");
-        li.textContent = `${doc.id}: ${Math.floor(data.coins)} coins (x${(data.multiplier || 1).toFixed(1)})`;
+        li.textContent = `${doc.id.split('@')[0]}: ${Math.floor(data.coins)} coins (x${(data.multiplier || 1).toFixed(1)})`;
         leaderboardList.appendChild(li);
       });
     }
@@ -326,6 +381,9 @@
     }
 
     // Event Listeners
+    document.getElementById("loginBtn").addEventListener("click", login);
+    document.getElementById("registerBtn").addEventListener("click", register);
+    document.getElementById("logoutBtn").addEventListener("click", logout);
     document.getElementById("gold").addEventListener("click", dig);
     document.getElementById("buyBasicPickaxe").addEventListener("click", () => buyUpgrade(20, 1, "Basic Pickaxe"));
     document.getElementById("buyGoldVault").addEventListener("click", () => buyUpgrade(2000, 100, "Gold Vault"));
@@ -347,17 +405,22 @@
 
     // Game Loop
     setInterval(() => {
-      coins += dps * multiplier;
-      timePlayed += 1000;
-      startEvent();
-      updateDisplay();
-      saveData();
-      updateLeaderboard();
+      if (user) {
+        coins += dps * multiplier;
+        timePlayed += 1000;
+        startEvent();
+        updateDisplay();
+        saveData();
+      }
     }, 1000);
 
+    // Leaderboard Update (every 60 seconds)
+    setInterval(() => {
+      if (user) updateLeaderboard();
+    }, 60000);
+
     // Initial Load
-    loadData();
-    showPage('home');
+    // loadData() is called after auth state changes
   </script>
 </body>
 </html>
