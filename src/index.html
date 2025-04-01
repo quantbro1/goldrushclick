@@ -6,8 +6,8 @@
   <title>GoldRushClick</title>
   <link 
     rel="icon" 
-    type="image/x-icon" 
-    href="/images/pickaxe-16.ico"
+    type="image/png" 
+    href="/images/pickaxe-16.png"
   >
   <style>
     body { font-family: 'Courier New', monospace; margin: 0; background-color: #fdf6e3; color: #333; }
@@ -30,7 +30,20 @@
     #footer a { color: #d4a017; text-decoration: none; margin: 0 10px; }
     ul { list-style: none; padding: 0; }
     li { margin: 5px 0; }
-    #loginPage, #instructions, #privacy, #terms { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 2px solid #d4a017; max-width: 500px; max-height: 80%; overflow-y: auto; }
+    #loginPage, #instructions, #privacy, #terms { 
+      display: none; 
+      position: fixed; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%, -50%); 
+      background: white; 
+      padding: 20px; 
+      border: 2px solid #d4a017; 
+      max-width: 500px; 
+      max-height: 80%; 
+      overflow-y: auto; 
+      z-index: 1000; /* Ensure it’s on top */
+    }
     #loginPage.active { display: block; }
 
     /* Mobile optimizations */
@@ -48,13 +61,13 @@
         width: 90%; 
         max-width: 90%; 
         padding: 15px; 
-        top: 50%; 
-        left: 50%; 
-        transform: translate(-50%, -50%); 
         font-size: 14px; 
+        display: none; /* Default hidden */
+      }
+      #loginPage.active, #instructions.active, #privacy.active, #terms.active { 
+        display: block; /* Show when active */
       }
       #loginPage input { width: 100%; padding: 8px; box-sizing: border-box; }
-      #loginPage.active { display: block; }
       #friendEmail, #chatInput { width: 70%; padding: 8px; box-sizing: border-box; }
       #sendFriendRequest, #sendChat { padding: 8px 12px; }
       #footer { font-size: 12px; }
@@ -93,7 +106,7 @@
     <h1>Welcome to GoldRushClick!</h1>
     <p>Dig for gold, complete quests, and rise to the top!</p>
     <button onclick="showPage('game')">Start Digging</button>
-    <button onclick="document.getElementById('instructions').style.display='block'">How to Play</button>
+    <button onclick="document.getElementById('instructions').style.display='block'; document.getElementById('instructions').classList.add('active')">How to Play</button>
   </div>
 
   <div id="game" class="page">
@@ -167,7 +180,7 @@
       <li><strong>Level Up</strong>: Earn XP to unlock lore and more.</li>
       <li><strong>Community</strong>: Add friends, chat, and check the leaderboard!</li>
     </ul>
-    <button onclick="document.getElementById('instructions').style.display='none'">Close</button>
+    <button onclick="document.getElementById('instructions').style.display='none'; document.getElementById('instructions').classList.remove('active')">Close</button>
   </div>
 
   <div id="privacy">
@@ -181,7 +194,7 @@
       <li><strong>Contact</strong>: GitHub repo.</li>
     </ul>
     <p>Last updated: April 1, 2025.</p>
-    <button onclick="document.getElementById('privacy').style.display='none'">Close</button>
+    <button onclick="document.getElementById('privacy').style.display='none'; document.getElementById('privacy').classList.remove('active')">Close</button>
   </div>
 
   <div id="terms">
@@ -195,12 +208,12 @@
       <li><strong>Liability</strong>: Play at your own risk.</li>
     </ul>
     <p><a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub</a>. Last updated: April 1, 2025.</p>
-    <button onclick="document.getElementById('terms').style.display='none'">Close</button>
+    <button onclick="document.getElementById('terms').style.display='none'; document.getElementById('terms').classList.remove('active')">Close</button>
   </div>
 
   <div id="footer">
-    <a href="#" onclick="document.getElementById('privacy').style.display='block'; return false;">Privacy Policy</a>
-    <a href="#" onclick="document.getElementById('terms').style.display='block'; return false;">Terms of Service</a>
+    <a href="#" onclick="document.getElementById('privacy').style.display='block'; document.getElementById('privacy').classList.add('active'); return false;">Privacy Policy</a>
+    <a href="#" onclick="document.getElementById('terms').style.display='block'; document.getElementById('terms').classList.add('active'); return false;">Terms of Service</a>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -333,7 +346,7 @@
       if (pageId === 'community') {
         console.log("Triggering leaderboard update from showPage");
         updateLeaderboard();
-        updateFriends FLA();
+        updateFriends();
         updatePendingRequests();
       }
     }
@@ -551,7 +564,7 @@
         console.log("Fetching leaderboard data...");
         const snapshot = await db.collection("players")
           .orderBy("coins", "desc")
-          .limit(10) // Limit to top 10 players
+          .limit(10)
           .get();
         const leaderboardList = document.getElementById("leaderboardList");
         leaderboardList.innerHTML = "";
