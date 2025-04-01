@@ -184,10 +184,10 @@
     }
 
     firebase.initializeApp(firebaseConfig);
-    console.log("Firebase initialized:", firebaseConfig);
+    console.log("Firebase initialized successfully");
     const db = firebase.firestore();
     const auth = firebase.auth();
-    console.log("Auth loaded:", auth);
+    console.log("Auth module loaded");
 
     let user = null;
     let username = "Guest";
@@ -198,12 +198,15 @@
       if (firebaseUser) {
         user = firebaseUser;
         username = firebaseUser.email.split('@')[0];
+        console.log("User logged in:", username);
         await loadData();
         document.getElementById("loginPage").style.display = "none";
         showPage('home');
+        updateLeaderboard(); // Initial leaderboard load after login
       } else {
         user = null;
         username = "Guest";
+        console.log("User logged out");
         document.getElementById("loginPage").style.display = "block";
         document.querySelectorAll('.page:not(#loginPage)').forEach(page => page.classList.remove('active'));
       }
@@ -225,7 +228,7 @@
       console.log("Registering:", email);
       try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        console.log("Registered:", userCredential.user);
+        console.log("Registered:", userCredential.user.email);
       } catch (error) {
         console.error("Registration failed:", error);
         alert("Registration failed: " + error.message);
@@ -233,8 +236,8 @@
     }
 
     async function logout() {
-      await auth.signOut();
       await saveData(); // Save before logout
+      await auth.signOut();
       alert("Logged out!");
     }
 
@@ -253,6 +256,7 @@
         skin = data.skin || "Default";
         dailyDay = data.dailyDay || 1;
         chatMessages = data.chatMessages || [];
+        console.log("Data loaded for", username, ":", { coins, level });
       } else {
         await saveData();
       }
@@ -276,7 +280,7 @@
       document.getElementById(pageId).classList.add('active');
       updateDisplay();
       if (pageId === 'community') {
-        console.log("Triggering leaderboard update");
+        console.log("Triggering leaderboard update from showPage");
         updateLeaderboard();
       }
     }
@@ -307,7 +311,7 @@
         coins -= cost;
         dps += dpsIncrease;
         updateDisplay();
-        saveData(); // Save immediately for upgrades
+        saveData();
       } else {
         alert(`Not enough coins for ${itemName}!`);
       }
@@ -328,7 +332,7 @@
         coins -= cost;
         skin = "Golden";
         updateDisplay();
-        saveData(); // Save immediately for skin
+        saveData();
       } else {
         alert("Not enough coins for Golden Skin!");
       }
@@ -341,7 +345,7 @@
         xp -= xpNeeded;
         alert(`Level Up! You're now Level ${level}`);
         if (level >= 5) document.getElementById("loreUnlock").innerHTML = "Chapter 2: Legends speak of a golden vein...";
-        saveData(); // Save on level up
+        saveData();
       }
     }
 
@@ -357,7 +361,7 @@
         return;
       }
       updateDisplay();
-      saveData(); // Save on quest claim
+      saveData();
     }
 
     function claimDaily() {
@@ -366,14 +370,14 @@
       alert(`Daily bonus claimed! +${rewards[dailyDay - 1]} coins`);
       dailyDay = dailyDay % 5 + 1;
       updateDisplay();
-      saveData(); // Save on daily claim
+      saveData();
     }
 
     function playRockSmash() {
       coins += 10;
       alert("Rock Smash! +10 coins");
       updateDisplay();
-      saveData(); // Save on event play
+      saveData();
     }
 
     function addFriend() {
@@ -386,7 +390,7 @@
         chatMessages.push(`${username}: ${message}`);
         document.getElementById("chatInput").value = "";
         updateChat();
-        saveData(); // Save on chat send
+        saveData();
       }
     }
 
@@ -406,6 +410,10 @@
         const snapshot = await db.collection("players").orderBy("coins", "desc").limit(5).get();
         console.log("Leaderboard snapshot size:", snapshot.size);
         const leaderboardList = document.getElementById("leaderboardList");
+        if (!leaderboardList) {
+          console.error("Leaderboard list element not found!");
+          return;
+        }
         leaderboardList.innerHTML = "";
         if (snapshot.empty) {
           leaderboardList.innerHTML = "<li>No players found yet!</li>";
@@ -421,7 +429,8 @@
         });
       } catch (error) {
         console.error("Leaderboard error:", error);
-        leaderboardList.innerHTML = "<li>Error loading leaderboard</li>";
+        const leaderboardList = document.getElementById("leaderboardList");
+        if (leaderboardList) leaderboardList.innerHTML = "<li>Error loading leaderboard</li>";
       }
     }
 
@@ -435,7 +444,7 @@
           eventActive = false;
           document.getElementById("eventBanner").style.display = "none";
           document.getElementById("eventStatus").textContent = "None";
-          saveData(); // Save after event ends
+          saveData();
         }, 20000);
       }
     }
@@ -499,7 +508,7 @@
     // Leaderboard Update
     setInterval(() => {
       if (user) {
-        console.log("Periodic leaderboard update");
+        console.log("Periodic leaderboard update triggered");
         updateLeaderboard();
       }
     }, 60000);
