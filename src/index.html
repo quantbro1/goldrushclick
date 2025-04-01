@@ -34,7 +34,7 @@
   <div id="loginPage" class="page active">
     <h1>GoldRushClick Login</h1>
     <p>Email: <input id="emailInput" type="email" placeholder="example@email.com"></p>
-    <p>Password: <input id="passwordInput" type="password" placeholder="Password"></p>
+    <p>Password: <input id="passwordInput" type="="password" placeholder="Password"></p>
     <button id="loginBtn">Login</button>
     <button id="registerBtn">Register</button>
   </div>
@@ -287,7 +287,7 @@
     function showPage(pageId) {
       if (!user) return;
       console.log("Showing page:", pageId);
-      document.querySelectorAll('.page').ForEach(page => page.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
       updateDisplay();
       if (pageId === 'community') {
