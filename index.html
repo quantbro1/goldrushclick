@@ -24,6 +24,8 @@
     .progress-fill { height: 100%; background: #d4a017; transition: width 0.3s; }
     #footer { margin-top: 20px; font-size: 14px; }
     #footer a { color: #d4a017; text-decoration: none; margin: 0 10px; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 5px 0; }
   </style>
 </head>
 <body>
@@ -59,50 +61,50 @@
     <h1>Profile</h1>
     <p>Total Clicks: <span id="totalClicks">0</span> | Time Played: <span id="timePlayed">0s</span></p>
     <p>Pickaxe Skin: <span id="skin">Default</span></p>
-    <button onclick="buySkin('Golden', 500)">Buy Golden Skin (500 coins)</button>
+    <button id="buyGoldenSkin">Buy Golden Skin (500 coins)</button>
   </div>
 
   <div id="quests" class="page">
     <h1>Quests</h1>
     <ul id="questList">
-      <li>Click 100 times - <button onclick="claimQuest('click100')">Claim (50 coins)</button></li>
-      <li>Earn 500 coins - <button onclick="claimQuest('earn500')">Claim (100 coins)</button></li>
+      <li>Click 100 times - <button id="claimClick100">Claim (50 coins)</button></li>
+      <li>Earn 500 coins - <button id="claimEarn500">Claim (100 coins)</button></li>
     </ul>
-    <p>Daily Bonus: <button onclick="claimDaily()">Claim (Day <span id="dailyDay">1</span>)</button></p>
+    <p>Daily Bonus: <button id="claimDaily">Claim (Day <span id="dailyDay">1</span>)</button></p>
   </div>
 
   <div id="community" class="page">
     <h1>Community</h1>
-    <p>Leaderboard: <span id="leaderboardList"></span></p>
-    <p>Friends: <button onclick="addFriend()">Add Friend</button></p>
-    <p>Chat: <input id="chatInput" placeholder="Say something..."><button onclick="sendChat()">Send</button></p>
+    <p>Leaderboard: <ul id="leaderboardList"></ul></p>
+    <p>Friends: <button id="addFriend">Add Friend</button></p>
+    <p>Chat: <input id="chatInput" placeholder="Say something..."><button id="sendChat">Send</button></p>
     <ul id="chatList"></ul>
   </div>
 
   <div id="shop" class="page">
     <h1>Shop</h1>
     <ul>
-      <li><button onclick="buyUpgrade(20, 1, 'Basic Pickaxe')">Basic Pickaxe (20 coins, +1 DPS)</button></li>
-      <li><button onclick="buyUpgrade(2000, 100, 'Gold Vault')">Gold Vault (2000 coins, +100 DPS)</button></li>
-      <li><button onclick="goPremium()">Premium Rush ($1, +200 DPS)</button></li>
+      <li><button id="buyBasicPickaxe">Basic Pickaxe (20 coins, +1 DPS)</button></li>
+      <li><button id="buyGoldVault">Gold Vault (2000 coins, +100 DPS)</button></li>
+      <li><button id="buyPremium">Premium Rush ($1, +200 DPS)</button></li>
     </ul>
   </div>
 
   <div id="events" class="page">
     <h1>Events</h1>
     <p>Current Event: <span id="eventStatus">None</span></p>
-    <button onclick="startMiniGame()">Play Rock Smash (10 coins)</button>
+    <button id="playRockSmash">Play Rock Smash (10 coins)</button>
   </div>
 
   <div id="lore" class="page">
     <h1>Lore</h1>
     <p>Chapter 1: The mines were once home to a lost civilization...</p>
-    <p>Unlock more by reaching Level 5!</p>
+    <p id="loreUnlock">Unlock more by reaching Level 5!</p>
   </div>
 
   <div id="footer">
-    <a href="#" onclick="alert('Privacy Policy')">Privacy Policy</a>
-    <a href="#" onclick="alert('Terms of Service')">Terms of Service</a>
+    <a href="#" onclick="alert('This website is owned and operated by Quantbro Corp. See Privacy Policy.')">Privacy Policy</a>
+    <a href="#" onclick="alert('This website is owned and operated by Quantbro Corp. See Terms of Service.')">Terms of Service</a>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -110,20 +112,22 @@
   <script src="https://js.stripe.com/v3/"></script>
   <script>
     const stripe = Stripe('pk_test_51R8lPYDIy2nI1g7e4FE9TCBdq4i6ui8BTzkh2IwBlb8Mj2bNEELO19sZrRwPTacbTBzBKSEoL6aDdEr4Adk2h8tP00kuMmFyoM');
-    const firebaseConfig = { /* Your Firebase config */ };
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY", // Replace with your Firebase API key
+      authDomain: "goldrushclick.firebaseapp.com",
+      projectId: "goldrushclick",
+      storageBucket: "goldrushclick.firebasestorage.app",
+      messagingSenderId: "43423974817",
+      appId: "1:43423974817:web:7ed559d67001e9a739b7e0",
+      measurementId: "G-YQRFZ1DZBR"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     let username = localStorage.getItem('username') || "Guest_" + Math.floor(Math.random() * 1000);
     localStorage.setItem('username', username);
     let coins = 0, dps = 0, multiplier = 1, xp = 0, level = 1, totalClicks = 0, timePlayed = 0;
-    let skin = "Default", eventActive = false, dailyDay = 1;
-
-    function showPage(pageId) {
-      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-      document.getElementById(pageId).classList.add('active');
-      updateDisplay();
-    }
+    let skin = "Default", eventActive = false, dailyDay = 1, chatMessages = [];
 
     async function loadData() {
       const doc = await db.collection("players").doc(username).get();
@@ -134,15 +138,29 @@
         multiplier = data.multiplier || 1;
         xp = data.xp || 0;
         level = data.level || 1;
+        totalClicks = data.totalClicks || 0;
+        timePlayed = data.timePlayed || 0;
         skin = data.skin || "Default";
+        dailyDay = data.dailyDay || 1;
+        chatMessages = data.chatMessages || [];
       } else {
-        await db.collection("players").doc(username).set({ coins, digsPerSecond: dps, multiplier, xp, level, skin });
+        await saveData();
       }
       updateDisplay();
+      updateChat();
     }
 
     async function saveData() {
-      await db.collection("players").doc(username).set({ coins, digsPerSecond: dps, multiplier, xp, level, skin });
+      await db.collection("players").doc(username).set({
+        coins, digsPerSecond: dps, multiplier, xp, level, totalClicks, timePlayed, skin, dailyDay, chatMessages,
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      updateDisplay();
     }
 
     function dig() {
@@ -153,14 +171,16 @@
       checkLevelUp();
       createCoinPop(coinGain);
       updateDisplay();
+      saveData();
     }
 
     function createCoinPop(amount) {
+      const gold = document.getElementById("gold");
       const pop = document.createElement("div");
       pop.className = "coin-pop";
       pop.textContent = `+${amount}`;
-      pop.style.left = `${document.getElementById("gold").offsetLeft + 20}px`;
-      pop.style.top = `${document.getElementById("gold").offsetTop - 20}px`;
+      pop.style.left = `${gold.offsetLeft + 20}px`;
+      pop.style.top = `${gold.offsetTop - 20}px`;
       document.body.appendChild(pop);
       setTimeout(() => pop.remove(), 1000);
     }
@@ -177,17 +197,23 @@
     }
 
     function goPremium() {
-      stripe.redirectToCheckout({ lineItems: [{ price: 'price_1R8lQcDIy2nI1g7eQdl4RreS', quantity: 1 }], mode: 'payment', successUrl: window.location.href + '?premium=true', cancelUrl: window.location.href });
+      stripe.redirectToCheckout({
+        lineItems: [{ price: 'price_1R8lQcDIy2nI1g7eQdl4RreS', quantity: 1 }],
+        mode: 'payment',
+        successUrl: window.location.href + '?premium=true',
+        cancelUrl: window.location.href
+      });
     }
 
-    function buySkin(skinName, cost) {
+    function buySkin() {
+      const cost = 500;
       if (coins >= cost) {
         coins -= cost;
-        skin = skinName;
+        skin = "Golden";
         updateDisplay();
         saveData();
       } else {
-        alert("Not enough coins!");
+        alert("Not enough coins for Golden Skin!");
       }
     }
 
@@ -197,6 +223,9 @@
         level++;
         xp -= xpNeeded;
         alert(`Level Up! You're now Level ${level}`);
+        if (level >= 5) {
+          document.getElementById("loreUnlock").innerHTML = "Chapter 2: Legends speak of a golden vein deep below...";
+        }
       }
     }
 
@@ -209,6 +238,7 @@
         alert("Quest completed! +100 coins");
       } else {
         alert("Quest not completed yet!");
+        return;
       }
       updateDisplay();
       saveData();
@@ -217,32 +247,53 @@
     function claimDaily() {
       const rewards = [10, 20, 50, 100, 200];
       coins += rewards[dailyDay - 1];
+      alert(`Daily bonus claimed! +${rewards[dailyDay - 1]} coins`);
       dailyDay = dailyDay % 5 + 1;
       updateDisplay();
       saveData();
-      alert(`Daily bonus claimed! +${rewards[dailyDay - 2]} coins`);
     }
 
-    function startMiniGame() {
+    function playRockSmash() {
       coins += 10;
       alert("Rock Smash! +10 coins");
       updateDisplay();
       saveData();
     }
 
-    function updateDisplay() {
-      document.getElementById("usernameDisplay").innerText = username;
-      document.getElementById("coins").innerText = Math.floor(coins);
-      document.getElementById("dps").innerText = dps;
-      document.getElementById("multiplier").innerText = multiplier.toFixed(1) + "x";
-      document.getElementById("xp").innerText = xp;
-      document.getElementById("level").innerText = level;
-      document.getElementById("totalClicks").innerText = totalClicks;
-      document.getElementById("timePlayed").innerText = Math.floor(timePlayed / 1000) + "s";
-      document.getElementById("skin").innerText = skin;
-      document.getElementById("xpProgress").style.width = `${(xp / (level * 100)) * 100}%`;
-      document.getElementById("xpNext").innerText = level * 100;
-      document.getElementById("dailyDay").innerText = dailyDay;
+    function addFriend() {
+      alert("Friend feature coming soon!");
+    }
+
+    function sendChat() {
+      const message = document.getElementById("chatInput").value;
+      if (message) {
+        chatMessages.push(`${username}: ${message}`);
+        document.getElementById("chatInput").value = "";
+        updateChat();
+        saveData();
+      }
+    }
+
+    function updateChat() {
+      const chatList = document.getElementById("chatList");
+      chatList.innerHTML = "";
+      chatMessages.slice(-5).forEach(msg => {
+        const li = document.createElement("li");
+        li.textContent = msg;
+        chatList.appendChild(li);
+      });
+    }
+
+    async function updateLeaderboard() {
+      const snapshot = await db.collection("players").orderBy("coins", "desc").limit(5).get();
+      const leaderboardList = document.getElementById("leaderboardList");
+      leaderboardList.innerHTML = "";
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.textContent = `${doc.id}: ${Math.floor(data.coins)} coins (x${(data.multiplier || 1).toFixed(1)})`;
+        leaderboardList.appendChild(li);
+      });
     }
 
     function startEvent() {
@@ -250,24 +301,61 @@
         eventActive = true;
         document.getElementById("eventBanner").textContent = "Gold Fever! 5x Coins for 20s!";
         document.getElementById("eventBanner").style.display = "block";
-        document.getElementById("eventStatus").innerText = "Gold Fever (20s)";
+        document.getElementById("eventStatus").textContent = "Gold Fever (20s)";
         setTimeout(() => {
           eventActive = false;
           document.getElementById("eventBanner").style.display = "none";
-          document.getElementById("eventStatus").innerText = "None";
+          document.getElementById("eventStatus").textContent = "None";
         }, 20000);
       }
     }
 
+    function updateDisplay() {
+      document.getElementById("usernameDisplay").textContent = username;
+      document.getElementById("coins").textContent = Math.floor(coins);
+      document.getElementById("dps").textContent = dps;
+      document.getElementById("multiplier").textContent = multiplier.toFixed(1) + "x";
+      document.getElementById("xp").textContent = xp;
+      document.getElementById("level").textContent = level;
+      document.getElementById("totalClicks").textContent = totalClicks;
+      document.getElementById("timePlayed").textContent = Math.floor(timePlayed / 1000) + "s";
+      document.getElementById("skin").textContent = skin;
+      document.getElementById("xpProgress").style.width = `${(xp / (level * 100)) * 100}%`;
+      document.getElementById("xpNext").textContent = level * 100;
+      document.getElementById("dailyDay").textContent = dailyDay;
+    }
+
+    // Event Listeners
     document.getElementById("gold").addEventListener("click", dig);
+    document.getElementById("buyBasicPickaxe").addEventListener("click", () => buyUpgrade(20, 1, "Basic Pickaxe"));
+    document.getElementById("buyGoldVault").addEventListener("click", () => buyUpgrade(2000, 100, "Gold Vault"));
+    document.getElementById("buyPremium").addEventListener("click", goPremium);
+    document.getElementById("buyGoldenSkin").addEventListener("click", buySkin);
+    document.getElementById("claimClick100").addEventListener("click", () => claimQuest("click100"));
+    document.getElementById("claimEarn500").addEventListener("click", () => claimQuest("earn500"));
+    document.getElementById("claimDaily").addEventListener("click", claimDaily);
+    document.getElementById("playRockSmash").addEventListener("click", playRockSmash);
+    document.getElementById("addFriend").addEventListener("click", addFriend);
+    document.getElementById("sendChat").addEventListener("click", sendChat);
+
+    // Premium Check
+    if (window.location.search.includes('premium=true') && dps < 200) {
+      dps += 200;
+      alert("Premium Rush activated! +200 DPS");
+      saveData();
+    }
+
+    // Game Loop
     setInterval(() => {
       coins += dps * multiplier;
       timePlayed += 1000;
       startEvent();
       updateDisplay();
       saveData();
+      updateLeaderboard();
     }, 1000);
 
+    // Initial Load
     loadData();
     showPage('home');
   </script>
