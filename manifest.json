@@ -1,0 +1,15 @@
+{
+  "name": "GoldRushClick",
+  "short_name": "GoldRush",
+  "icons": [
+    {
+      "src": "/images/pickaxe-16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdf6e3",
+  "theme_color": "#d4a017"
+}
