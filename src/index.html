@@ -409,7 +409,7 @@
       }
       const popup = document.getElementById(popupId);
       popup.style.display = "block";
-      popup.dataset.wasLoginActive = wasActive ? "true" : "false"; // Store state
+      popup.dataset.wasLoginActive = wasActive ? "true" : "false";
     }
 
     function hidePopup(popupId) {
@@ -527,7 +527,6 @@
       }
       try {
         const friendSnapshot = await db.collection("players").where("email", "==", friendEmail).limit(1).get();
-        console.log("Friend snapshot size:", friendSnapshot.size);
         if (friendSnapshot.empty) {
           alert("User not found!");
           return;
@@ -535,7 +534,24 @@
         const friendDoc = friendSnapshot.docs[0];
         const friendUid = friendDoc.id;
         console.log("Found friend UID:", friendUid);
+
+        // Check if already friends
+        const friendCheck = await db.collection("players").doc(user.uid).collection("friends").doc(friendUid).get();
+        if (friendCheck.exists) {
+          alert(`${friendEmail.split('@')[0]} is already your friend!`);
+          document.getElementById("friendEmail").value = "";
+          return;
+        }
+
+        // Check if request already exists
         const requestId = `${user.uid}_${friendUid}`;
+        const requestCheck = await db.collection("friend_requests").doc(requestId).get();
+        if (requestCheck.exists) {
+          alert(`Friend request to ${friendEmail.split('@')[0]} already sent!`);
+          document.getElementById("friendEmail").value = "";
+          return;
+        }
+
         await db.collection("friend_requests").doc(requestId).set({
           senderUid: user.uid,
           receiverUid: friendUid,
