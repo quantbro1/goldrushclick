@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GoldRushClick</title>
-  <link rel="shortcut icon" rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAACcSURBVHgB7ZOxDYAwDEQPRiABLYoWGiBaqAFtoAEthhYq0KJoAQVaFClQsO7S/uUNksLb/UvyJPlJkmQvep2XsQBXcAEWcAMX4A5ewA18gDv4CHfwEe7gI9zBR7iDj3AHn+AOvsAdfIQ7+Ah38BHuwAvc4Ru8wzd4h2/wDt/gHb7BO3yDd/gG7/AN3uEbvMM3eIdv8A7f4B2+wTs8pRto65zBZwAAAABJRU5ErkJggg==">
+  <link 
+    rel="icon" 
+    type="image/x-icon" 
+    href="/images/pickaxe-16.ico"
+  >
   <style>
     body { font-family: 'Courier New', monospace; margin: 0; background-color: #fdf6e3; color: #333; }
     nav { background: #d4a017; padding: 10px; text-align: center; }
@@ -510,69 +514,41 @@
     async function updateLeaderboard() {
       try {
         console.log("Fetching leaderboard data...");
-        const snapshot = await db.collection("players").orderBy("coins", "desc").limit(5).get();
-        console.log("Leaderboard snapshot size:", snapshot.size);
+        const snapshot = await db.collection("players").orderBy("coins", "desc").limit(10).get();
         const leaderboardList = document.getElementById("leaderboardList");
-        if (!leaderboardList) {
-          console.error("Leaderboard list element not found!");
-          return;
-        }
         leaderboardList.innerHTML = "";
-        if (snapshot.empty) {
-          leaderboardList.innerHTML = "<li>No players found yet!</li>";
-          console.log("No leaderboard data available.");
-          return;
-        }
         snapshot.forEach(doc => {
           const data = doc.data();
-          console.log("Player data:", doc.id, data);
-          const playerName = data.email ? data.email.split('@')[0] : "Unknown";
+          const name = data.email ? data.email.split('@')[0] : "Unknown";
           const li = document.createElement("li");
-          li.textContent = `${playerName}: ${Math.floor(data.coins)} coins (x${(data.multiplier || 1).toFixed(1)})`;
+          li.textContent = `${name}: ${data.coins} coins`;
           leaderboardList.appendChild(li);
         });
       } catch (error) {
-        console.error("Leaderboard error:", error);
-        const leaderboardList = document.getElementById("leaderboardList");
-        if (leaderboardList) leaderboardList.innerHTML = "<li>Error loading leaderboard</li>";
-      }
-    }
-
-    function startEvent() {
-      if (!eventActive && Math.random() < 0.1) {
-        eventActive = true;
-        document.getElementById("eventBanner").textContent = "Gold Fever! 5x Coins for 20s!";
-        document.getElementById("eventBanner").style.display = "block";
-        document.getElementById("eventStatus").textContent = "Gold Fever (20s)";
-        setTimeout(() => {
-          eventActive = false;
-          document.getElementById("eventBanner").style.display = "none";
-          document.getElementById("eventStatus").textContent = "None";
-          saveData();
-        }, 20000);
+        console.error("Error updating leaderboard:", error);
       }
     }
 
     function updateDisplay() {
       document.getElementById("usernameDisplay").textContent = username;
-      document.getElementById("coins").textContent = Math.floor(coins);
-      document.getElementById("dps").textContent = dps;
-      document.getElementById("multiplier").textContent = multiplier.toFixed(1) + "x";
-      document.getElementById("xp").textContent = xp;
       document.getElementById("level").textContent = level;
+      document.getElementById("coins").textContent = coins;
+      document.getElementById("xp").textContent = xp;
+      document.getElementById("dps").textContent = dps;
+      document.getElementById("multiplier").textContent = `${multiplier}x`;
       document.getElementById("totalClicks").textContent = totalClicks;
-      document.getElementById("timePlayed").textContent = Math.floor(timePlayed / 1000) + "s";
+      document.getElementById("timePlayed").textContent = `${timePlayed}s`;
       document.getElementById("skin").textContent = skin;
-      document.getElementById("xpProgress").style.width = `${(xp / (level * 100)) * 100}%`;
-      document.getElementById("xpNext").textContent = level * 100;
       document.getElementById("dailyDay").textContent = dailyDay;
+      const xpNeeded = level * 100;
+      document.getElementById("xpNext").textContent = xpNeeded;
+      document.getElementById("xpProgress").style.width = `${(xp / xpNeeded) * 100}%`;
     }
 
-    // Event Listeners
+    document.getElementById("gold").addEventListener("click", dig);
     document.getElementById("loginBtn").addEventListener("click", login);
     document.getElementById("registerBtn").addEventListener("click", register);
     document.getElementById("logoutBtn").addEventListener("click", logout);
-    document.getElementById("gold").addEventListener("click", dig);
     document.getElementById("buyBasicPickaxe").addEventListener("click", () => buyUpgrade(20, 1, "Basic Pickaxe"));
     document.getElementById("buyGoldVault").addEventListener("click", () => buyUpgrade(2000, 100, "Gold Vault"));
     document.getElementById("buyPremium").addEventListener("click", goPremium);
@@ -584,40 +560,35 @@
     document.getElementById("sendFriendRequest").addEventListener("click", sendFriendRequest);
     document.getElementById("sendChat").addEventListener("click", sendChat);
 
-    // Premium Check
-    if (window.location.search.includes('premium=true') && dps < 200) {
-      dps += 200;
-      alert("Premium Rush activated! +200 DPS");
-      saveData();
-    }
-
-    // Game Loop (UI only)
     setInterval(() => {
       if (user) {
         coins += dps * multiplier;
-        timePlayed += 1000;
-        startEvent();
+        timePlayed++;
         updateDisplay();
+        saveData();
       }
     }, 1000);
 
-    // Periodic Save (every 60 seconds)
     setInterval(() => {
-      if (user) {
-        console.log("Periodic save triggered");
-        saveData();
+      if (user && Math.random() < 0.1 && !eventActive) {
+        eventActive = true;
+        document.getElementById("eventBanner").textContent = "Gold Fever! 5x coins for 20s!";
+        document.getElementById("eventBanner").style.display = "block";
+        document.getElementById("eventStatus").textContent = "Gold Fever (20s)";
+        setTimeout(() => {
+          eventActive = false;
+          document.getElementById("eventBanner").style.display = "none";
+          document.getElementById("eventStatus").textContent = "None";
+        }, 20000);
       }
     }, 60000);
 
-    // Leaderboard and Friends Update
-    setInterval(() => {
-      if (user) {
-        console.log("Periodic leaderboard update triggered");
-        updateLeaderboard();
-        updateFriends();
-        updatePendingRequests();
-      }
-    }, 60000);
+    if (window.location.search.includes("premium=true")) {
+      dps += 200;
+      alert("Premium Rush activated! +200 DPS");
+      saveData();
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   </script>
 </body>
 </html>
