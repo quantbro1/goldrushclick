@@ -119,41 +119,41 @@
     <p>Welcome to GoldRushClick! Here’s how to get started:</p>
     <ul style="text-align: left;">
       <li><strong>Click for Gold</strong>: Click the "⛏️ Click for Gold!" text to earn coins.</li>
-      <li><strong>Buy Upgrades</strong>: Spend coins in the Shop to boost your Digs per Second (DPS). Start with a Basic Pickaxe (20 coins) or go big with a Gold Vault (2000 coins)!</li>
-      <li><strong>Premium Rush</strong>: Pay $1 for a +200 DPS boost—best bang for your buck!</li>
+      <li><strong>Buy Upgrades</strong>: Spend coins in the Shop to boost your Digs per Second (DPS).</li>
+      <li><strong>Premium Rush</strong>: Pay $1 for a +200 DPS boost!</li>
       <li><strong>Quests</strong>: Complete tasks like "Click 100 times" for extra coins.</li>
       <li><strong>Events</strong>: Catch "Gold Fever" (5x coins, 20s) for huge gains!</li>
-      <li><strong>Level Up</strong>: Earn XP per click to unlock lore and bragging rights.</li>
-      <li><strong>Community</strong>: Chat, check the leaderboard, and soon, add friends!</li>
+      <li><strong>Level Up</strong>: Earn XP to unlock lore and more.</li>
+      <li><strong>Community</strong>: Chat and check the leaderboard!</li>
     </ul>
     <button onclick="document.getElementById('instructions').style.display='none'">Close</button>
   </div>
 
   <div id="privacy">
     <h2>Privacy Policy</h2>
-    <p>This website is owned and operated by Quantbro Corp. We care about your privacy. Here’s the basics:</p>
+    <p>Owned by Quantbro Corp. Basics:</p>
     <ul style="text-align: left;">
-      <li><strong>Data We Collect</strong>: Your email (for login), game progress (coins, DPS, etc.), and chat messages are stored to make the game work.</li>
-      <li><strong>How We Use It</strong>: Only to run the game and show leaderboards—nothing shady.</li>
-      <li><strong>Sharing</strong>: We don’t sell or share your data, except with Firebase (database) and Stripe (payments) to keep things running.</li>
-      <li><strong>Cookies</strong>: Just local storage for some stats—no tracking cookies.</li>
-      <li><strong>Contact</strong>: Questions? Hit us up via the game’s GitHub.</li>
+      <li><strong>Data</strong>: Email, game progress, chats stored for functionality.</li>
+      <li><strong>Use</strong>: Only for game and leaderboards.</li>
+      <li><strong>Sharing</strong>: Only with Firebase and Stripe.</li>
+      <li><strong>Cookies</strong>: Local storage only.</li>
+      <li><strong>Contact</strong>: GitHub repo.</li>
     </ul>
-    <p>This policy might change—check back here. Last updated: April 1, 2025.</p>
+    <p>Last updated: April 1, 2025.</p>
     <button onclick="document.getElementById('privacy').style.display='none'">Close</button>
   </div>
 
   <div id="terms">
     <h2>Terms of Service</h2>
-    <p>This website is owned and operated by Quantbro Corp. By playing GoldRushClick, you agree to these rules:</p>
+    <p>Owned by Quantbro Corp. Rules:</p>
     <ul style="text-align: left;">
-      <li><strong>Use</strong>: Play fair—no cheating or hacking.</li>
-      <li><strong>Payments</strong>: $1 Premium Rush is non-refundable—processed via Stripe.</li>
-      <li><strong>Data</strong>: We store your game info—see Privacy Policy.</li>
-      <li><strong>Changes</strong>: We can update the game or these terms anytime.</li>
-      <li><strong>Liability</strong>: We’re not responsible if the game breaks or you lose progress—play at your own risk.</li>
+      <li><strong>Use</strong>: No cheating.</li>
+      <li><strong>Payments</strong>: $1 Premium Rush, non-refundable.</li>
+      <li><strong>Data</strong>: See Privacy Policy.</li>
+      <li><strong>Changes</strong>: Terms may update.</li>
+      <li><strong>Liability</strong>: Play at your own risk.</li>
     </ul>
-    <p>Questions? Check the <a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub repo</a>. Last updated: April 1, 2025.</p>
+    <p><a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub</a>. Last updated: April 1, 2025.</p>
     <button onclick="document.getElementById('terms').style.display='none'">Close</button>
   </div>
 
@@ -179,15 +179,15 @@
     };
 
     if (firebaseConfig.apiKey === "FIREBASE_API_KEY_PLACEHOLDER") {
-      console.error("Firebase API key not injected. Set FIREBASE_API_KEY in Netlify environment variables and ensure build step is working.");
-      alert("Game won’t work—API key not set! Check console.");
+      console.error("Firebase API key not injected. Set FIREBASE_API_KEY in Netlify env vars.");
+      alert("Game won’t work—API key not set!");
     }
 
     firebase.initializeApp(firebaseConfig);
-    console.log("Firebase initialized with config:", firebaseConfig);
+    console.log("Firebase initialized:", firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
-    console.log("Auth module loaded:", auth);
+    console.log("Auth loaded:", auth);
 
     let user = null;
     let username = "Guest";
@@ -222,19 +222,20 @@
     async function register() {
       const email = document.getElementById("emailInput").value;
       const password = document.getElementById("passwordInput").value;
-      console.log("Attempting registration with:", email, password);
+      console.log("Registering:", email);
       try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        console.log("Registration successful:", userCredential.user);
+        console.log("Registered:", userCredential.user);
       } catch (error) {
-        console.error("Registration failed:", error.code, error.message);
+        console.error("Registration failed:", error);
         alert("Registration failed: " + error.message);
       }
     }
 
     async function logout() {
       await auth.signOut();
-      alert("Logged out successfully!");
+      await saveData(); // Save before logout
+      alert("Logged out!");
     }
 
     async function loadData() {
@@ -270,10 +271,14 @@
 
     function showPage(pageId) {
       if (!user) return;
+      console.log("Showing page:", pageId);
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
       updateDisplay();
-      if (pageId === 'community') updateLeaderboard(); // Load leaderboard immediately
+      if (pageId === 'community') {
+        console.log("Triggering leaderboard update");
+        updateLeaderboard();
+      }
     }
 
     function dig() {
@@ -284,7 +289,6 @@
       checkLevelUp();
       createCoinPop(coinGain);
       updateDisplay();
-      saveData();
     }
 
     function createCoinPop(amount) {
@@ -303,7 +307,7 @@
         coins -= cost;
         dps += dpsIncrease;
         updateDisplay();
-        saveData();
+        saveData(); // Save immediately for upgrades
       } else {
         alert(`Not enough coins for ${itemName}!`);
       }
@@ -324,7 +328,7 @@
         coins -= cost;
         skin = "Golden";
         updateDisplay();
-        saveData();
+        saveData(); // Save immediately for skin
       } else {
         alert("Not enough coins for Golden Skin!");
       }
@@ -336,9 +340,8 @@
         level++;
         xp -= xpNeeded;
         alert(`Level Up! You're now Level ${level}`);
-        if (level >= 5) {
-          document.getElementById("loreUnlock").innerHTML = "Chapter 2: Legends speak of a golden vein deep below...";
-        }
+        if (level >= 5) document.getElementById("loreUnlock").innerHTML = "Chapter 2: Legends speak of a golden vein...";
+        saveData(); // Save on level up
       }
     }
 
@@ -354,7 +357,7 @@
         return;
       }
       updateDisplay();
-      saveData();
+      saveData(); // Save on quest claim
     }
 
     function claimDaily() {
@@ -363,14 +366,14 @@
       alert(`Daily bonus claimed! +${rewards[dailyDay - 1]} coins`);
       dailyDay = dailyDay % 5 + 1;
       updateDisplay();
-      saveData();
+      saveData(); // Save on daily claim
     }
 
     function playRockSmash() {
       coins += 10;
       alert("Rock Smash! +10 coins");
       updateDisplay();
-      saveData();
+      saveData(); // Save on event play
     }
 
     function addFriend() {
@@ -383,7 +386,7 @@
         chatMessages.push(`${username}: ${message}`);
         document.getElementById("chatInput").value = "";
         updateChat();
-        saveData();
+        saveData(); // Save on chat send
       }
     }
 
@@ -399,6 +402,7 @@
 
     async function updateLeaderboard() {
       try {
+        console.log("Fetching leaderboard data...");
         const snapshot = await db.collection("players").orderBy("coins", "desc").limit(5).get();
         console.log("Leaderboard snapshot size:", snapshot.size);
         const leaderboardList = document.getElementById("leaderboardList");
@@ -431,6 +435,7 @@
           eventActive = false;
           document.getElementById("eventBanner").style.display = "none";
           document.getElementById("eventStatus").textContent = "None";
+          saveData(); // Save after event ends
         }, 20000);
       }
     }
@@ -473,24 +478,31 @@
       saveData();
     }
 
-    // Game Loop
+    // Game Loop (UI only)
     setInterval(() => {
       if (user) {
         coins += dps * multiplier;
         timePlayed += 1000;
         startEvent();
         updateDisplay();
-        saveData();
       }
     }, 1000);
 
-    // Leaderboard Update
+    // Periodic Save (every 60 seconds)
     setInterval(() => {
-      if (user) updateLeaderboard();
+      if (user) {
+        console.log("Periodic save triggered");
+        saveData();
+      }
     }, 60000);
 
-    // Initial leaderboard load
-    if (user) updateLeaderboard();
+    // Leaderboard Update
+    setInterval(() => {
+      if (user) {
+        console.log("Periodic leaderboard update");
+        updateLeaderboard();
+      }
+    }, 60000);
   </script>
 </body>
 </html>
