@@ -169,7 +169,7 @@
   <script>
     const stripe = Stripe('pk_test_51R8lPYDIy2nI1g7e4FE9TCBdq4i6ui8BTzkh2IwBlb8Mj2bNEELO19sZrRwPTacbTBzBKSEoL6aDdEr4Adk2h8tP00kuMmFyoM');
     const firebaseConfig = {
-      apiKey: "FIREBASE_API_KEY_PLACEHOLDER", // This gets replaced during build
+      apiKey: "FIREBASE_API_KEY_PLACEHOLDER",
       authDomain: "goldrushclick.firebaseapp.com",
       projectId: "goldrushclick",
       storageBucket: "goldrushclick.firebasestorage.app",
@@ -177,15 +177,17 @@
       appId: "1:43423974817:web:7ed559d67001e9a739b7e0",
       measurementId: "G-YQRFZ1DZBR"
     };
-    // Check if API key is missing
-    if (firebaseConfig.apiKey === "MISSING_API_KEY") {
-      console.error("Firebase API key is missing. Set FIREBASE_API_KEY in Netlify environment variables.");
-      alert("Game won’t work properly—API key missing! Check console for details.");
+
+    if (firebaseConfig.apiKey === "FIREBASE_API_KEY_PLACEHOLDER") {
+      console.error("Firebase API key not injected. Set FIREBASE_API_KEY in Netlify environment variables and ensure build step is working.");
+      alert("Game won’t work—API key not set! Check console.");
     }
 
     firebase.initializeApp(firebaseConfig);
+    console.log("Firebase initialized with config:", firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
+    console.log("Auth module loaded:", auth);
 
     let user = null;
     let username = "Guest";
@@ -220,9 +222,12 @@
     async function register() {
       const email = document.getElementById("emailInput").value;
       const password = document.getElementById("passwordInput").value;
+      console.log("Attempting registration with:", email, password);
       try {
-        await auth.createUserWithEmailAndPassword(email, password);
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        console.log("Registration successful:", userCredential.user);
       } catch (error) {
+        console.error("Registration failed:", error.code, error.message);
         alert("Registration failed: " + error.message);
       }
     }
@@ -256,6 +261,7 @@
 
     async function saveData() {
       if (!user) return;
+      console.log("Saving data:", { coins, dps, multiplier, xp, level });
       await db.collection("players").doc(user.uid).set({
         coins, digsPerSecond: dps, multiplier, xp, level, totalClicks, timePlayed, skin, dailyDay, chatMessages,
         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
@@ -267,6 +273,7 @@
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
       updateDisplay();
+      if (pageId === 'community') updateLeaderboard(); // Load leaderboard immediately
     }
 
     function dig() {
@@ -391,15 +398,27 @@
     }
 
     async function updateLeaderboard() {
-      const snapshot = await db.collection("players").orderBy("coins", "desc").limit(5).get();
-      const leaderboardList = document.getElementById("leaderboardList");
-      leaderboardList.innerHTML = "";
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const li = document.createElement("li");
-        li.textContent = `${doc.id.split('@')[0]}: ${Math.floor(data.coins)} coins (x${(data.multiplier || 1).toFixed(1)})`;
-        leaderboardList.appendChild(li);
-      });
+      try {
+        const snapshot = await db.collection("players").orderBy("coins", "desc").limit(5).get();
+        console.log("Leaderboard snapshot size:", snapshot.size);
+        const leaderboardList = document.getElementById("leaderboardList");
+        leaderboardList.innerHTML = "";
+        if (snapshot.empty) {
+          leaderboardList.innerHTML = "<li>No players found yet!</li>";
+          console.log("No leaderboard data available.");
+          return;
+        }
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          console.log("Player data:", doc.id, data);
+          const li = document.createElement("li");
+          li.textContent = `${doc.id.split('@')[0]}: ${Math.floor(data.coins)} coins (x${(data.multiplier || 1).toFixed(1)})`;
+          leaderboardList.appendChild(li);
+        });
+      } catch (error) {
+        console.error("Leaderboard error:", error);
+        leaderboardList.innerHTML = "<li>Error loading leaderboard</li>";
+      }
     }
 
     function startEvent() {
@@ -469,6 +488,9 @@
     setInterval(() => {
       if (user) updateLeaderboard();
     }, 60000);
+
+    // Initial leaderboard load
+    if (user) updateLeaderboard();
   </script>
 </body>
 </html>
