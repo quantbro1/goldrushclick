@@ -233,6 +233,12 @@
       try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         console.log("Registered:", userCredential.user.email);
+        await db.collection("players").doc(userCredential.user.email).set({
+          coins: 0, digsPerSecond: 0, multiplier: 1, xp: 0, level: 1,
+          totalClicks: 0, timePlayed: 0, skin: "Default", dailyDay: 1,
+          chatMessages: [], email: userCredential.user.email,
+          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
       } catch (error) {
         console.error("Registration failed:", error);
         alert("Registration failed: " + error.message);
@@ -247,7 +253,7 @@
 
     async function loadData() {
       if (!user) return;
-      const doc = await db.collection("players").doc(user.uid).get();
+      const doc = await db.collection("players").doc(user.email).get();
       if (doc.exists) {
         const data = doc.data();
         coins = data.coins || 0;
@@ -271,8 +277,9 @@
     async function saveData() {
       if (!user) return;
       console.log("Saving data:", { coins, dps, multiplier, xp, level });
-      await db.collection("players").doc(user.uid).set({
+      await db.collection("players").doc(user.email).set({
         coins, digsPerSecond: dps, multiplier, xp, level, totalClicks, timePlayed, skin, dailyDay, chatMessages,
+        email: user.email,
         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
       });
     }
@@ -387,21 +394,21 @@
     }
 
     async function sendFriendRequest() {
-      const friendEmail = document.getElementById("friendEmail").value;
+      const friendEmail = document.getElementById("friendEmail").value.trim();
       if (!friendEmail || friendEmail === user.email) {
         alert("Enter a valid friend’s email!");
         return;
       }
       try {
-        const usersSnapshot = await db.collection("players").where("email", "==", friendEmail).get();
-        if (usersSnapshot.empty) {
+        const friendDoc = await db.collection("players").doc(friendEmail).get();
+        if (!friendDoc.exists) {
           alert("User not found!");
           return;
         }
-        const friendUid = usersSnapshot.docs[0].id;
-        const requestId = `${user.uid}_${friendUid}`;
+        const friendUid = friendDoc.id;
+        const requestId = `${user.email}_${friendUid}`;
         await db.collection("friend_requests").doc(requestId).set({
-          senderUid: user.uid,
+          senderUid: user.email,
           receiverUid: friendUid,
           status: "pending"
         });
@@ -410,19 +417,19 @@
         updatePendingRequests();
       } catch (error) {
         console.error("Error sending friend request:", error);
-        alert("Failed to send friend request!");
+        alert("Failed to send friend request! " + error.message);
       }
     }
 
     async function acceptFriendRequest(requestId, senderUid) {
       try {
         await db.collection("friend_requests").doc(requestId).update({ status: "accepted" });
-        await db.collection("players").doc(user.uid).collection("friends").doc(senderUid).set({
+        await db.collection("players").doc(user.email).collection("friends").doc(senderUid).set({
           friendUid: senderUid,
           addedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        await db.collection("players").doc(senderUid).collection("friends").doc(user.uid).set({
-          friendUid: user.uid,
+        await db.collection("players").doc(senderUid).collection("friends").doc(user.email).set({
+          friendUid: user.email,
           addedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         alert("Friend request accepted!");
@@ -430,7 +437,7 @@
         updatePendingRequests();
       } catch (error) {
         console.error("Error accepting friend request:", error);
-        alert("Failed to accept friend request!");
+        alert("Failed to accept friend request! " + error.message);
       }
     }
 
@@ -438,7 +445,7 @@
       if (!user) return;
       const friendsList = document.getElementById("friendsList");
       friendsList.innerHTML = "";
-      const friendsSnapshot = await db.collection("players").doc(user.uid).collection("friends").get();
+      const friendsSnapshot = await db.collection("players").doc(user.email).collection("friends").get();
       if (friendsSnapshot.empty) {
         friendsList.innerHTML = "<li>No friends yet!</li>";
         return;
@@ -446,7 +453,7 @@
       friendsSnapshot.forEach(async (doc) => {
         const friendUid = doc.data().friendUid;
         const friendDoc = await db.collection("players").doc(friendUid).get();
-        const friendName = friendDoc.exists ? friendDoc.id.split('@')[0] : "Unknown";
+        const friendName = friendDoc.exists ? friendUid.split('@')[0] : "Unknown";
         const li = document.createElement("li");
         li.textContent = friendName;
         friendsList.appendChild(li);
@@ -458,7 +465,7 @@
       const pendingList = document.getElementById("pendingRequests");
       pendingList.innerHTML = "";
       const requestsSnapshot = await db.collection("friend_requests")
-        .where("receiverUid", "==", user.uid)
+        .where("receiverUid", "==", user.email)
         .where("status", "==", "pending")
         .get();
       if (requestsSnapshot.empty) {
@@ -468,7 +475,7 @@
       requestsSnapshot.forEach(async (doc) => {
         const senderUid = doc.data().senderUid;
         const senderDoc = await db.collection("players").doc(senderUid).get();
-        const senderName = senderDoc.exists ? senderDoc.id.split('@')[0] : "Unknown";
+        const senderName = senderDoc.exists ? senderUid.split('@')[0] : "Unknown";
         const li = document.createElement("li");
         li.innerHTML = `${senderName} <button onclick="acceptFriendRequest('${doc.id}', '${senderUid}')">Accept</button>`;
         pendingList.appendChild(li);
