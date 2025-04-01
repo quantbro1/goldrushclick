@@ -34,7 +34,7 @@
   <div id="loginPage" class="page active">
     <h1>GoldRushClick Login</h1>
     <p>Email: <input id="emailInput" type="email" placeholder="example@email.com"></p>
-    <p>Password: <input id="passwordInput" type="="password" placeholder="Password"></p>
+    <p>Password: <input id="passwordInput" type="password" placeholder="Password"></p>
     <button id="loginBtn">Login</button>
     <button id="registerBtn">Register</button>
   </div>
@@ -454,7 +454,7 @@
       friendsSnapshot.forEach(async (doc) => {
         const friendUid = doc.data().friendUid;
         const friendDoc = await db.collection("players").doc(friendUid).get();
-        const friendName = friendDoc.exists ? friendDoc.data().email.split('@')[0] : "Unknown";
+        const friendName = friendDoc.exists ? (friendDoc.data().email ? friendDoc.data().email.split('@')[0] : "Unknown") : "Unknown";
         const li = document.createElement("li");
         li.textContent = friendName;
         friendsList.appendChild(li);
@@ -476,7 +476,7 @@
       requestsSnapshot.forEach(async (doc) => {
         const senderUid = doc.data().senderUid;
         const senderDoc = await db.collection("players").doc(senderUid).get();
-        const senderName = senderDoc.exists ? senderDoc.data().email.split('@')[0] : "Unknown";
+        const senderName = senderDoc.exists ? (senderDoc.data().email ? senderDoc.data().email.split('@')[0] : "Unknown") : "Unknown";
         const li = document.createElement("li");
         li.innerHTML = `${senderName} <button onclick="acceptFriendRequest('${doc.id}', '${senderUid}')">Accept</button>`;
         pendingList.appendChild(li);
@@ -522,8 +522,9 @@
         snapshot.forEach(doc => {
           const data = doc.data();
           console.log("Player data:", doc.id, data);
+          const playerName = data.email ? data.email.split('@')[0] : "Unknown";
           const li = document.createElement("li");
-          li.textContent = `${data.email.split('@')[0]}: ${Math.floor(data.coins)} coins (x${(data.multiplier || 1).toFixed(1)})`;
+          li.textContent = `${playerName}: ${Math.floor(data.coins)} coins (x${(data.multiplier || 1).toFixed(1)})`;
           leaderboardList.appendChild(li);
         });
       } catch (error) {
