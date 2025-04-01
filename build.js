@@ -22,5 +22,8 @@ fs.writeFileSync(distPath, html);
 // Copy images/ to dist/images/
 fs.copySync(imgDir, path.join(distDir, 'images'), { overwrite: true });
 
+// Copy manifest.json to dist/
+fs.copySync('manifest.json', path.join(distDir, 'manifest.json'), { overwrite: true });
+
 console.log('Build complete. API key injected:', apiKey === "MISSING_API_KEY" ? "Missing" : "Present");
 console.log('Files in dist:', fs.readdirSync(distDir));
