@@ -17,11 +17,11 @@
     nav { background: #d4a017; padding: 10px; text-align: center; position: relative; }
     nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
     nav a:hover { text-decoration: underline; }
-    .page { display: none; text-align: center; padding: 20px; max-width: 800px; margin: 0 auto; }
+    .page { display: none; text-align: center; padding: 20px; max-width: 800px; margin: 0 auto; min-height: calc(100vh - 150px); }
     .active { display: block; }
-    h1 { color: #d4a017; font-size: 36px; }
-    h2 { color: #d4a017; font-size: 24px; }
-    button { padding: 10px 20px; font-size: 16px; margin: 5px; background-color: #d4a017; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    h1 { color: #d4a017; font-size: 36px; margin: 10px 0; }
+    h2 { color: #d4a017; font-size: 24px; margin: 15px 0; }
+    button { padding: 10px 20px; font-size: 16px; margin: 5px; background-color: #d4a017; color: white; border: none; border-radius: 5px; cursor: pointer; min-width: 100px; }
     button:hover { background-color: #b58900; }
     #gold { font-size: 48px; cursor: pointer; transition: transform 0.1s; }
     #gold:hover { transform: scale(1.1); }
@@ -30,7 +30,7 @@
     #eventBanner { font-size: 20px; color: #d4a017; font-weight: bold; display: none; }
     .progress-bar { width: 200px; height: 20px; background: #ccc; margin: 10px auto; border: 1px solid #333; }
     .progress-fill { height: 100%; background: #d4a017; transition: width 0.3s; }
-    #footer { margin-top: 20px; font-size: 14px; position: fixed; bottom: 0; width: 100%; z-index: 800; background: #fdf6e3; padding: 10px 0; }
+    #footer { font-size: 14px; width: 100%; z-index: 800; background: #fdf6e3; padding: 10px 0; text-align: center; }
     #footer a { color: #d4a017; text-decoration: none; margin: 0 10px; }
     ul { list-style: none; padding: 0; }
     li { margin: 5px 0; }
@@ -75,27 +75,36 @@
     .header-pickaxes img { width: 16px; height: 16px; margin: 0 4px; vertical-align: middle; }
     .lore-chapter { display: none; }
     .lore-chapter.visible { display: block; }
+    #hamburger { display: none; font-size: 24px; color: white; cursor: pointer; padding: 5px; }
+    #navMenu { display: block; }
+    #navMenu.active { display: block; }
 
+    /* Mobile Optimizations */
     @media (max-width: 768px) {
       nav { padding: 8px; }
-      nav a { margin: 0 10px; font-size: 14px; display: inline-block; }
-      h1 { font-size: 24px; }
+      nav a { margin: 5px 10px; font-size: 14px; display: inline-block; }
+      h1 { font-size: 28px; }
       h2 { font-size: 20px; }
-      p { font-size: 14px; }
-      button { padding: 8px 16px; font-size: 14px; min-width: 100px; }
+      p { font-size: 14px; line-height: 1.4; }
+      button { padding: 8px 16px; font-size: 14px; min-width: 90px; }
       #gold { font-size: 36px; padding: 10px; }
       .coin-pop { font-size: 16px; }
       @keyframes fadeUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-30px); } }
       .progress-bar { width: 80%; max-width: 200px; height: 16px; }
+      .page { padding: 15px; min-height: calc(100vh - 120px); }
       #loginPage, #instructions, #privacy, #terms { 
         width: 90%; 
         max-width: 90%; 
         padding: 15px; 
         font-size: 14px; 
+        box-sizing: border-box; 
       }
-      #loginPage.active { display: block; }
-      #loginPage input { width: 100%; padding: 8px; box-sizing: border-box; }
-      #friendEmail, #chatInput { width: 70%; padding: 8px; box-sizing: border-box; }
+      #loginPage input, #friendEmail, #chatInput { 
+        width: 100%; 
+        padding: 8px; 
+        box-sizing: border-box; 
+        margin: 5px 0; 
+      }
       #sendFriendRequest, #sendChat { padding: 8px 12px; }
       #footer { font-size: 12px; }
       #footer a { margin: 0 5px; }
@@ -105,13 +114,48 @@
     }
 
     @media (max-width: 480px) {
-      nav a { display: block; margin: 5px 0; }
-      h1 { font-size: 20px; }
+      nav { padding: 5px; text-align: left; }
+      #hamburger { display: inline-block; }
+      #navMenu { 
+        display: none; 
+        position: absolute; 
+        top: 40px; 
+        left: 0; 
+        width: 100%; 
+        background: #d4a017; 
+        padding: 10px 0; 
+        z-index: 1000; 
+      }
+      #navMenu a { 
+        display: block; 
+        margin: 10px 0; 
+        font-size: 16px; 
+        padding: 10px 20px; 
+        text-align: left; 
+      }
+      #authBox { 
+        position: static; 
+        padding: 10px 20px; 
+        width: 100%; 
+        text-align: left; 
+        box-sizing: border-box; 
+      }
+      #authBox button { display: inline-block; margin: 0; }
+      h1 { font-size: 24px; }
       h2 { font-size: 18px; }
-      button { min-width: 80px; }
-      #gold { font-size: 30px; }
-      #authBox { position: static; margin-top: 10px; text-align: center; }
+      p { font-size: 13px; }
+      button { padding: 8px 12px; font-size: 13px; min-width: 80px; }
+      #gold { font-size: 32px; }
+      .coin-pop { font-size: 14px; }
+      .progress-bar { width: 90%; height: 14px; }
+      .header-pickaxes { margin-bottom: 10px; }
       .header-pickaxes img { margin: 0 1px; }
+      #loginPage, #instructions, #privacy, #terms { 
+        width: 95%; 
+        padding: 10px; 
+        font-size: 13px; 
+      }
+      #footer { padding: 8px 0; }
     }
   </style>
 </head>
@@ -125,17 +169,20 @@
   </div>
 
   <nav>
-    <a href="#" onclick="showPage('home')">Home</a>
-    <a href="#" onclick="showPage('game')">Game</a>
-    <a href="#" onclick="showPage('profile')">Profile</a>
-    <a href="#" onclick="showPage('quests')">Quests</a>
-    <a href="#" onclick="showPage('community')">Community</a>
-    <a href="#" onclick="showPage('shop')">Shop</a>
-    <a href="#" onclick="showPage('events')">Events</a>
-    <a href="#" onclick="showPage('lore')">Lore</a>
-    <div id="authBox">
-      <span id="authStatus">Guest</span>
-      <button id="authToggle" onclick="toggleAuth()">Sign In</button>
+    <span id="hamburger">☰</span>
+    <div id="navMenu">
+      <a href="#" onclick="showPage('home')">Home</a>
+      <a href="#" onclick="showPage('game')">Game</a>
+      <a href="#" onclick="showPage('profile')">Profile</a>
+      <a href="#" onclick="showPage('quests')">Quests</a>
+      <a href="#" onclick="showPage('community')">Community</a>
+      <a href="#" onclick="showPage('shop')">Shop</a>
+      <a href="#" onclick="showPage('events')">Events</a>
+      <a href="#" onclick="showPage('lore')">Lore</a>
+      <div id="authBox">
+        <span id="authStatus">Guest</span>
+        <button id="authToggle" onclick="toggleAuth()">Sign In</button>
+      </div>
     </div>
   </nav>
 
@@ -453,6 +500,10 @@
         updateLeaderboard();
         updateFriends();
         updatePendingRequests();
+      }
+      if (window.innerWidth <= 480) {
+        document.getElementById("navMenu").classList.remove('active');
+        document.getElementById("navMenu").style.display = "none";
       }
     }
 
@@ -784,6 +835,13 @@
     document.getElementById("playRockSmash").addEventListener("click", playRockSmash);
     document.getElementById("sendFriendRequest").addEventListener("click", sendFriendRequest);
     document.getElementById("sendChat").addEventListener("click", sendChat);
+
+    // Hamburger menu toggle
+    document.getElementById("hamburger").addEventListener("click", () => {
+      const navMenu = document.getElementById("navMenu");
+      navMenu.classList.toggle('active');
+      navMenu.style.display = navMenu.classList.contains('active') ? "block" : "none";
+    });
 
     setInterval(() => {
       coins += dps * multiplier;
