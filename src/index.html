@@ -71,7 +71,10 @@
       font-size: 14px; 
     }
     #authBox button { padding: 5px 10px; font-size: 14px; }
-    .header-image { width: 100%; max-width: 800px; height: 200px; background: url('/images/pickaxe-16.png') center/cover no-repeat; margin: 0 auto 20px; }
+    .header-pickaxes { width: 100%; max-width: 800px; margin: 0 auto 20px; text-align: center; overflow: hidden; }
+    .header-pickaxes img { width: 16px; height: 16px; margin: 0 4px; vertical-align: middle; }
+    .lore-chapter { display: none; }
+    .lore-chapter.visible { display: block; }
 
     @media (max-width: 768px) {
       nav { padding: 8px; }
@@ -98,7 +101,7 @@
       #footer a { margin: 0 5px; }
       #authBox { top: 5px; right: 5px; font-size: 12px; }
       #authBox button { padding: 4px 8px; font-size: 12px; }
-      .header-image { height: 150px; }
+      .header-pickaxes img { margin: 0 2px; }
     }
 
     @media (max-width: 480px) {
@@ -108,7 +111,7 @@
       button { min-width: 80px; }
       #gold { font-size: 30px; }
       #authBox { position: static; margin-top: 10px; text-align: center; }
-      .header-image { height: 100px; }
+      .header-pickaxes img { margin: 0 1px; }
     }
   </style>
 </head>
@@ -137,7 +140,9 @@
   </nav>
 
   <div id="home" class="page active">
-    <div class="header-image"></div>
+    <div class="header-pickaxes">
+      <img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe"><img src="/images/pickaxe-16.png" alt="Pickaxe">
+    </div>
     <h1>Welcome to GoldRushClick!</h1>
     <p>Dig for gold, complete quests, and rise to the top in this exciting idle clicker adventure!</p>
     <p>Welcome to <strong>GoldRushClick</strong>, a free online gold mining game where you take on the role of a determined prospector. Swing your pickaxe to unearth treasures, unlock powerful upgrades, and explore a world filled with quests, events, and ancient lore. Whether you’re here to compete on global leaderboards or enjoy a casual mining experience, GoldRushClick offers endless fun for all players. Start digging today and discover the riches hidden beneath the earth!</p>
@@ -215,8 +220,22 @@
   <div id="lore" class="page">
     <h1>Lore of GoldRushClick</h1>
     <p>Deep beneath the earth lies a tale of ambition and mystery. The mines of GoldRushClick were once home to a lost civilization, the Auric Tribe, who thrived on the wealth of a golden vein. Legends say they vanished after unearthing a cursed treasure, leaving behind clues for brave miners to discover. As you dig, you’ll uncover their story—and perhaps their fate.</p>
-    <p>Chapter 1: The Auric Tribe built grand cities underground, powered by gold. But their greed awoke something dark...</p>
-    <p id="loreUnlock">Chapter 2 coming soon: The Golden Vein’s secret awaits!</p>
+    <div id="chapter1" class="lore-chapter">
+      <h2>Chapter 1: The Rise of the Auric Tribe</h2>
+      <p>The Auric Tribe built grand cities underground, their halls gleaming with gold. They mastered the art of mining, crafting tools from the earth’s bounty. But their prosperity came at a cost—whispers of a dark force grew louder with every nugget unearthed.</p>
+    </div>
+    <div id="chapter2" class="lore-chapter">
+      <h2>Chapter 2: The Golden Vein</h2>
+      <p>At the heart of their empire lay the Golden Vein, a seam of pure wealth that seemed endless. The tribe’s shamans warned of its power, but the chieftains pressed deeper. Strange carvings began to appear on the walls—warnings or prophecies, no one could agree.</p>
+    </div>
+    <div id="chapter3" class="lore-chapter">
+      <h2>Chapter 3: The Curse Awakens</h2>
+      <p>One fateful day, a miner struck a stone that bled shadow. The air turned cold, and the tribe’s golden halls dimmed. Some fled, others fought, but the curse spread like wildfire. By dawn, the mines were silent, their people gone—swallowed by the earth they’d conquered.</p>
+    </div>
+    <div id="chapter4" class="lore-chapter">
+      <h2>Chapter 4: Echoes of the Lost</h2>
+      <p>Today, the mines echo with the past. Miners report glimpses of ghostly figures wielding pickaxes, and tales persist of a hidden chamber where the tribe’s final treasure lies. Will you unravel the mystery, or join the lost in their eternal dig?</p>
+    </div>
   </div>
 
   <div id="instructions">
@@ -263,7 +282,7 @@
   </div>
 
   <div id="footer">
-    <p>&copy; 2025 Quantbro Corp. All rights reserved.</p>
+    <p>© 2025 Quantbro Corp. All rights reserved.</p>
     <a href="#" onclick="showPopup('privacy'); return false;">Privacy Policy</a>
     <a href="#" onclick="showPopup('terms'); return false;">Terms of Service</a>
     <a href="https://github.com/quantbro1/goldrushclick" target="_blank">Contact Us</a>
@@ -329,6 +348,9 @@
       const password = document.getElementById("passwordInput").value;
       try {
         await auth.signInWithEmailAndPassword(email, password);
+        const loginPage = document.getElementById("loginPage");
+        loginPage.classList.remove('active');
+        loginPage.style.display = "none";
       } catch (error) {
         alert("Login failed: " + error.message);
       }
@@ -348,6 +370,9 @@
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         });
         console.log("Player doc created with email:", userCredential.user.email);
+        const loginPage = document.getElementById("loginPage");
+        loginPage.classList.remove('active');
+        loginPage.style.display = "none";
       } catch (error) {
         console.error("Registration failed:", error);
         alert("Registration failed: " + error.message);
@@ -514,7 +539,7 @@
         level++;
         xp -= xpNeeded;
         alert(`Level Up! You're now Level ${level}`);
-        if (level >= 5) document.getElementById("loreUnlock").innerHTML = "Chapter 2: The Golden Vein’s secret awaits!";
+        updateDisplay();
         saveData();
       }
     }
@@ -738,6 +763,12 @@
       const xpNeeded = level * 100;
       document.getElementById("xpNext").textContent = xpNeeded;
       document.getElementById("xpProgress").style.width = `${(xp / xpNeeded) * 100}%`;
+
+      // Update lore chapter visibility
+      document.getElementById("chapter1").classList.toggle("visible", level >= 1);
+      document.getElementById("chapter2").classList.toggle("visible", level >= 5);
+      document.getElementById("chapter3").classList.toggle("visible", level >= 10);
+      document.getElementById("chapter4").classList.toggle("visible", level >= 15);
     }
 
     document.getElementById("gold").addEventListener("click", dig);
