@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GoldRushClick</title>
+  <meta name="description" content="GoldRushClick: A free online gold mining game where you dig for treasure, upgrade your pickaxe, and explore a rich world of quests and lore.">
+  <meta name="keywords" content="gold mining game, idle clicker, free online game, GoldRushClick">
+  <title>GoldRushClick - Free Gold Mining Adventure</title>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8529571438098551"
      crossorigin="anonymous"></script>
   <link rel="icon" type="image/png" href="/images/pickaxe-16.png?v=3" sizes="16x16">
@@ -13,11 +15,12 @@
   <style>
     body { font-family: 'Courier New', monospace; margin: 0; background-color: #fdf6e3; color: #333; }
     nav { background: #d4a017; padding: 10px; text-align: center; position: relative; }
-    nav a { color: white; margin: 0 15px; text-decoration: none; }
+    nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
     nav a:hover { text-decoration: underline; }
-    .page { display: none; text-align: center; padding: 20px; }
+    .page { display: none; text-align: center; padding: 20px; max-width: 800px; margin: 0 auto; }
     .active { display: block; }
     h1 { color: #d4a017; font-size: 36px; }
+    h2 { color: #d4a017; font-size: 24px; }
     button { padding: 10px 20px; font-size: 16px; margin: 5px; background-color: #d4a017; color: white; border: none; border-radius: 5px; cursor: pointer; }
     button:hover { background-color: #b58900; }
     #gold { font-size: 48px; cursor: pointer; transition: transform 0.1s; }
@@ -27,7 +30,7 @@
     #eventBanner { font-size: 20px; color: #d4a017; font-weight: bold; display: none; }
     .progress-bar { width: 200px; height: 20px; background: #ccc; margin: 10px auto; border: 1px solid #333; }
     .progress-fill { height: 100%; background: #d4a017; transition: width 0.3s; }
-    #footer { margin-top: 20px; font-size: 14px; position: fixed; bottom: 0; width: 100%; z-index: 800; background: #fdf6e3; }
+    #footer { margin-top: 20px; font-size: 14px; position: fixed; bottom: 0; width: 100%; z-index: 800; background: #fdf6e3; padding: 10px 0; }
     #footer a { color: #d4a017; text-decoration: none; margin: 0 10px; }
     ul { list-style: none; padding: 0; }
     li { margin: 5px 0; }
@@ -68,53 +71,49 @@
       font-size: 14px; 
     }
     #authBox button { padding: 5px 10px; font-size: 14px; }
+    .header-image { width: 100%; max-width: 800px; height: 200px; background: url('/images/pickaxe-16.png') center/cover no-repeat; margin: 0 auto 20px; }
 
-    /* Mobile optimizations */
     @media (max-width: 768px) {
       nav { padding: 8px; }
       nav a { margin: 0 10px; font-size: 14px; display: inline-block; }
       h1 { font-size: 24px; }
+      h2 { font-size: 20px; }
       p { font-size: 14px; }
       button { padding: 8px 16px; font-size: 14px; min-width: 100px; }
       #gold { font-size: 36px; padding: 10px; }
       .coin-pop { font-size: 16px; }
       @keyframes fadeUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-30px); } }
       .progress-bar { width: 80%; max-width: 200px; height: 16px; }
-      #loginPage { 
+      #loginPage, #instructions, #privacy, #terms { 
         width: 90%; 
         max-width: 90%; 
         padding: 15px; 
         font-size: 14px; 
-        z-index: 900; 
-      }
-      #instructions, #privacy, #terms { 
-        width: 90%; 
-        max-width: 90%; 
-        padding: 15px; 
-        font-size: 14px; 
-        z-index: 1000; 
       }
       #loginPage.active { display: block; }
       #loginPage input { width: 100%; padding: 8px; box-sizing: border-box; }
       #friendEmail, #chatInput { width: 70%; padding: 8px; box-sizing: border-box; }
       #sendFriendRequest, #sendChat { padding: 8px 12px; }
-      #footer { font-size: 12px; position: fixed; bottom: 0; width: 100%; }
+      #footer { font-size: 12px; }
       #footer a { margin: 0 5px; }
       #authBox { top: 5px; right: 5px; font-size: 12px; }
       #authBox button { padding: 4px 8px; font-size: 12px; }
+      .header-image { height: 150px; }
     }
 
     @media (max-width: 480px) {
       nav a { display: block; margin: 5px 0; }
       h1 { font-size: 20px; }
+      h2 { font-size: 18px; }
       button { min-width: 80px; }
       #gold { font-size: 30px; }
       #authBox { position: static; margin-top: 10px; text-align: center; }
+      .header-image { height: 100px; }
     }
   </style>
 </head>
 <body>
-  <div id="loginPage" class="page active">
+  <div id="loginPage" class="page">
     <h1>GoldRushClick Login</h1>
     <p>Email: <input id="emailInput" type="email" placeholder="example@email.com"></p>
     <p>Password: <input id="passwordInput" type="password" placeholder="Password"></p>
@@ -137,15 +136,26 @@
     </div>
   </nav>
 
-  <div id="home" class="page">
+  <div id="home" class="page active">
+    <div class="header-image"></div>
     <h1>Welcome to GoldRushClick!</h1>
-    <p>Dig for gold, complete quests, and rise to the top!</p>
+    <p>Dig for gold, complete quests, and rise to the top in this exciting idle clicker adventure!</p>
+    <p>Welcome to <strong>GoldRushClick</strong>, a free online gold mining game where you take on the role of a determined prospector. Swing your pickaxe to unearth treasures, unlock powerful upgrades, and explore a world filled with quests, events, and ancient lore. Whether you’re here to compete on global leaderboards or enjoy a casual mining experience, GoldRushClick offers endless fun for all players. Start digging today and discover the riches hidden beneath the earth!</p>
     <button onclick="showPage('game')">Start Digging</button>
     <button onclick="document.getElementById('instructions').style.display='block'">How to Play</button>
+    <p>Already a miner? <button onclick="toggleAuth()">Sign In</button> or <button onclick="toggleAuth()">Register</button> to save your progress and join the community!</p>
+    <h2>Tips for New Miners</h2>
+    <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
+      <li>Click fast to build your coin stash early on.</li>
+      <li>Invest in upgrades like the Basic Pickaxe to automate your earnings.</li>
+      <li>Check the Quests page daily for easy rewards.</li>
+      <li>Watch for Gold Fever events—they’re your ticket to big gains!</li>
+    </ul>
   </div>
 
   <div id="game" class="page">
     <h1>GoldRushClick</h1>
+    <p>Swing your pickaxe and watch your fortune grow! Upgrade your tools and aim for the top in this addictive gold mining adventure.</p>
     <p>Player: <span id="usernameDisplay">Guest</span> | Level: <span id="level">1</span></p>
     <p>Coins: <span id="coins">0</span> | XP: <span id="xp">0</span></p>
     <p id="gold">⛏️ Click for Gold!</p>
@@ -157,6 +167,7 @@
 
   <div id="profile" class="page">
     <h1>Profile</h1>
+    <p>Track your mining journey and customize your pickaxe!</p>
     <p>Total Clicks: <span id="totalClicks">0</span> | Time Played: <span id="timePlayed">0s</span></p>
     <p>Pickaxe Skin: <span id="skin">Default</span></p>
     <button id="buyGoldenSkin">Buy Golden Skin (500 coins)</button>
@@ -165,6 +176,7 @@
 
   <div id="quests" class="page">
     <h1>Quests</h1>
+    <p>Complete challenges to earn extra coins and boost your mining prowess!</p>
     <ul id="questList">
       <li>Click 100 times - <button id="claimClick100">Claim (50 coins)</button></li>
       <li>Earn 500 coins - <button id="claimEarn500">Claim (100 coins)</button></li>
@@ -174,6 +186,7 @@
 
   <div id="community" class="page">
     <h1>Community</h1>
+    <p>Connect with fellow miners, climb the ranks, and chat about your adventures!</p>
     <p>Leaderboard: <ul id="leaderboardList"></ul></p>
     <p>Friends: <ul id="friendsList"></ul></p>
     <p>Add Friend: <input id="friendEmail" placeholder="Friend's email"><button id="sendFriendRequest">Send Request</button></p>
@@ -184,6 +197,7 @@
 
   <div id="shop" class="page">
     <h1>Shop</h1>
+    <p>Upgrade your mining gear to dig faster and earn more!</p>
     <ul>
       <li><button id="buyBasicPickaxe">Basic Pickaxe (20 coins, +1 DPS)</button></li>
       <li><button id="buyGoldVault">Gold Vault (2000 coins, +100 DPS)</button></li>
@@ -193,19 +207,21 @@
 
   <div id="events" class="page">
     <h1>Events</h1>
+    <p>Join special events to boost your earnings and uncover surprises!</p>
     <p>Current Event: <span id="eventStatus">None</span></p>
     <button id="playRockSmash">Play Rock Smash (10 coins)</button>
   </div>
 
   <div id="lore" class="page">
-    <h1>Lore</h1>
-    <p>Chapter 1: The mines were once home to a lost civilization...</p>
-    <p id="loreUnlock">Unlock more by reaching Level 5!</p>
+    <h1>Lore of GoldRushClick</h1>
+    <p>Deep beneath the earth lies a tale of ambition and mystery. The mines of GoldRushClick were once home to a lost civilization, the Auric Tribe, who thrived on the wealth of a golden vein. Legends say they vanished after unearthing a cursed treasure, leaving behind clues for brave miners to discover. As you dig, you’ll uncover their story—and perhaps their fate.</p>
+    <p>Chapter 1: The Auric Tribe built grand cities underground, powered by gold. But their greed awoke something dark...</p>
+    <p id="loreUnlock">Chapter 2 coming soon: The Golden Vein’s secret awaits!</p>
   </div>
 
   <div id="instructions">
     <h2>How to Play GoldRushClick</h2>
-    <p>Welcome to GoldRushClick! Here’s how to get started:</p>
+    <p>Welcome to GoldRushClick, the ultimate free gold mining game! Here’s how to start your adventure:</p>
     <ul style="text-align: left;">
       <li><strong>Click for Gold</strong>: Click the "⛏️ Click for Gold!" text to earn coins.</li>
       <li><strong>Buy Upgrades</strong>: Spend coins in the Shop to boost your Digs per Second (DPS).</li>
@@ -247,8 +263,10 @@
   </div>
 
   <div id="footer">
+    <p>&copy; 2025 Quantbro Corp. All rights reserved.</p>
     <a href="#" onclick="showPopup('privacy'); return false;">Privacy Policy</a>
     <a href="#" onclick="showPopup('terms'); return false;">Terms of Service</a>
+    <a href="https://github.com/quantbro1/goldrushclick" target="_blank">Contact Us</a>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -289,8 +307,6 @@
         username = firebaseUser.email.split('@')[0];
         console.log("User logged in:", username, "UID:", user.uid);
         await loadData();
-        document.getElementById("loginPage").style.display = "none";
-        document.getElementById("loginPage").classList.remove('active');
         document.getElementById("authStatus").textContent = username;
         document.getElementById("authToggle").textContent = "Sign Out";
         showPage('home');
@@ -300,12 +316,11 @@
       } else {
         user = null;
         username = "Guest";
-        console.log("User logged out");
-        document.getElementById("loginPage").style.display = "block";
-        document.getElementById("loginPage").classList.add('active');
+        console.log("User logged out or guest mode");
+        await loadData();
         document.getElementById("authStatus").textContent = "Guest";
         document.getElementById("authToggle").textContent = "Sign In";
-        document.querySelectorAll('.page:not(#loginPage)').forEach(page => page.classList.remove('active'));
+        showPage('home');
       }
     });
 
@@ -327,9 +342,9 @@
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         console.log("Registered:", userCredential.user.email, "UID:", userCredential.user.uid);
         await db.collection("players").doc(userCredential.user.uid).set({
-          coins: 0, digsPerSecond: 0, multiplier: 1, xp: 0, level: 1,
-          totalClicks: 0, timePlayed: 0, skin: "Default", dailyDay: 1,
-          chatMessages: [], email: userCredential.user.email,
+          coins, digsPerSecond: dps, multiplier, xp, level,
+          totalClicks, timePlayed, skin, dailyDay,
+          chatMessages, email: userCredential.user.email,
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         });
         console.log("Player doc created with email:", userCredential.user.email);
@@ -355,46 +370,61 @@
     }
 
     async function loadData() {
-      if (!user) return;
-      const doc = await db.collection("players").doc(user.uid).get();
-      if (doc.exists) {
-        const data = doc.data();
-        coins = data.coins || 0;
-        dps = data.digsPerSecond || 0;
-        multiplier = data.multiplier || 1;
-        xp = data.xp || 0;
-        level = data.level || 1;
-        totalClicks = data.totalClicks || 0;
-        timePlayed = data.timePlayed || 0;
-        skin = data.skin || "Default";
-        dailyDay = data.dailyDay || 1;
-        chatMessages = data.chatMessages || [];
-        console.log("Data loaded for", username, ":", { coins, level });
+      if (user) {
+        const doc = await db.collection("players").doc(user.uid).get();
+        if (doc.exists) {
+          const data = doc.data();
+          coins = data.coins || 0;
+          dps = data.digsPerSecond || 0;
+          multiplier = data.multiplier || 1;
+          xp = data.xp || 0;
+          level = data.level || 1;
+          totalClicks = data.totalClicks || 0;
+          timePlayed = data.timePlayed || 0;
+          skin = data.skin || "Default";
+          dailyDay = data.dailyDay || 1;
+          chatMessages = data.chatMessages || [];
+          console.log("Data loaded for", username, ":", { coins, level });
+        } else {
+          await saveData();
+        }
       } else {
-        await saveData();
+        const guestData = JSON.parse(localStorage.getItem('guestData') || '{}');
+        coins = guestData.coins || 0;
+        dps = guestData.dps || 0;
+        multiplier = guestData.multiplier || 1;
+        xp = guestData.xp || 0;
+        level = guestData.level || 1;
+        totalClicks = guestData.totalClicks || 0;
+        timePlayed = guestData.timePlayed || 0;
+        skin = guestData.skin || "Default";
+        dailyDay = guestData.dailyDay || 1;
+        chatMessages = guestData.chatMessages || [];
       }
       updateDisplay();
       updateChat();
     }
 
     async function saveData() {
-      if (!user) return;
-      console.log("Saving data:", { coins, dps, multiplier, xp, level });
-      await db.collection("players").doc(user.uid).set({
-        coins, digsPerSecond: dps, multiplier, xp, level, totalClicks, timePlayed, skin, dailyDay, chatMessages,
-        email: user.email,
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      if (user) {
+        console.log("Saving data to Firebase:", { coins, dps, multiplier, xp, level });
+        await db.collection("players").doc(user.uid).set({
+          coins, digsPerSecond: dps, multiplier, xp, level, totalClicks, timePlayed, skin, dailyDay, chatMessages,
+          email: user.email,
+          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } else {
+        console.log("Saving data to local storage:", { coins, dps, multiplier, xp, level });
+        localStorage.setItem('guestData', JSON.stringify({ coins, dps, multiplier, xp, level, totalClicks, timePlayed, skin, dailyDay, chatMessages }));
+      }
     }
 
     function showPage(pageId) {
-      if (!user) return;
       console.log("Showing page:", pageId);
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
       updateDisplay();
-      if (pageId === 'community') {
-        console.log("Triggering leaderboard update from showPage");
+      if (pageId === 'community' && user) {
         updateLeaderboard();
         updateFriends();
         updatePendingRequests();
@@ -432,6 +462,7 @@
       checkLevelUp();
       createCoinPop(coinGain);
       updateDisplay();
+      saveData();
     }
 
     function createCoinPop(amount) {
@@ -483,7 +514,7 @@
         level++;
         xp -= xpNeeded;
         alert(`Level Up! You're now Level ${level}`);
-        if (level >= 5) document.getElementById("loreUnlock").innerHTML = "Chapter 2: Legends speak of a golden vein...";
+        if (level >= 5) document.getElementById("loreUnlock").innerHTML = "Chapter 2: The Golden Vein’s secret awaits!";
         saveData();
       }
     }
@@ -520,6 +551,10 @@
     }
 
     async function sendFriendRequest() {
+      if (!user) {
+        alert("Sign in to send friend requests!");
+        return;
+      }
       const friendEmail = document.getElementById("friendEmail").value.trim();
       console.log("Searching for email:", friendEmail);
       if (!friendEmail || friendEmail === user.email) {
@@ -536,7 +571,6 @@
         const friendUid = friendDoc.id;
         console.log("Found friend UID:", friendUid);
 
-        // Check if already friends
         const friendCheck = await db.collection("players").doc(user.uid).collection("friends").doc(friendUid).get();
         if (friendCheck.exists) {
           alert(`${friendEmail.split('@')[0]} is already your friend!`);
@@ -544,7 +578,6 @@
           return;
         }
 
-        // Check if request already exists
         const requestId = `${user.uid}_${friendUid}`;
         const requestCheck = await db.collection("friend_requests").doc(requestId).get();
         if (requestCheck.exists) {
@@ -588,7 +621,10 @@
     }
 
     async function updateFriends() {
-      if (!user) return;
+      if (!user) {
+        document.getElementById("friendsList").innerHTML = "<li>Sign in to see friends!</li>";
+        return;
+      }
       const friendsList = document.getElementById("friendsList");
       friendsList.innerHTML = "";
       const friendsSnapshot = await db.collection("players").doc(user.uid).collection("friends").get();
@@ -607,7 +643,10 @@
     }
 
     async function updatePendingRequests() {
-      if (!user) return;
+      if (!user) {
+        document.getElementById("pendingRequests").innerHTML = "<li>Sign in to see requests!</li>";
+        return;
+      }
       const pendingList = document.getElementById("pendingRequests");
       pendingList.innerHTML = "";
       const requestsSnapshot = await db.collection("friend_requests")
@@ -629,6 +668,10 @@
     }
 
     function sendChat() {
+      if (!user) {
+        alert("Sign in to chat!");
+        return;
+      }
       const message = document.getElementById("chatInput").value;
       if (message) {
         chatMessages.push(`${username}: ${message}`);
@@ -641,6 +684,10 @@
     function updateChat() {
       const chatList = document.getElementById("chatList");
       chatList.innerHTML = "";
+      if (!user) {
+        chatList.innerHTML = "<li>Sign in to chat!</li>";
+        return;
+      }
       chatMessages.slice(-5).forEach(msg => {
         const li = document.createElement("li");
         li.textContent = msg;
@@ -649,6 +696,10 @@
     }
 
     async function updateLeaderboard() {
+      if (!user) {
+        document.getElementById("leaderboardList").innerHTML = "<li>Sign in to see leaderboard!</li>";
+        return;
+      }
       try {
         console.log("Fetching leaderboard data...");
         const snapshot = await db.collection("players")
@@ -704,16 +755,14 @@
     document.getElementById("sendChat").addEventListener("click", sendChat);
 
     setInterval(() => {
-      if (user) {
-        coins += dps * multiplier;
-        timePlayed++;
-        updateDisplay();
-        saveData();
-      }
+      coins += dps * multiplier;
+      timePlayed++;
+      updateDisplay();
+      saveData();
     }, 1000);
 
     setInterval(() => {
-      if (user && Math.random() < 0.1 && !eventActive) {
+      if (Math.random() < 0.1 && !eventActive) {
         eventActive = true;
         document.getElementById("eventBanner").textContent = "Gold Fever! 5x coins for 20s!";
         document.getElementById("eventBanner").style.display = "block";
@@ -732,6 +781,8 @@
       saveData();
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+
+    loadData();
   </script>
 </body>
 </html>
