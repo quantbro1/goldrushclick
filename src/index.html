@@ -41,16 +41,16 @@
       left: 50%; 
       transform: translate(-50%, -50%); 
       background: white; 
-      padding: 15px; 
+      padding: 10px; 
       border: 2px solid #d4a017; 
-      max-width: 400px; 
+      max-width: 300px; 
       max-height: 80%; 
       overflow-y: auto; 
       z-index: 900; 
     }
     #loginPage.active { display: block; }
-    #loginPage input { width: 100%; padding: 6px; margin: 5px 0; box-sizing: border-box; }
-    #loginPage button { padding: 8px 16px; font-size: 14px; min-width: 80px; }
+    #loginPage input { width: 100%; padding: 5px; margin: 4px 0; box-sizing: border-box; font-size: 14px; }
+    #loginPage button { padding: 6px 12px; font-size: 13px; min-width: 70px; margin: 4px; }
     #instructions, #privacy, #terms { 
       display: none; 
       position: fixed; 
@@ -96,18 +96,19 @@
       .page { padding: 15px; min-height: calc(100vh - 120px); }
       #loginPage, #instructions, #privacy, #terms { 
         width: 90%; 
-        max-width: 350px; 
-        padding: 12px; 
-        font-size: 14px; 
+        max-width: 280px; 
+        padding: 10px; 
+        font-size: 13px; 
         box-sizing: border-box; 
       }
       #loginPage input, #friendEmail, #chatInput { 
         width: 100%; 
-        padding: 6px; 
+        padding: 5px; 
         box-sizing: border-box; 
-        margin: 5px 0; 
+        margin: 4px 0; 
+        font-size: 13px; 
       }
-      #loginPage button { padding: 6px 12px; font-size: 13px; min-width: 70px; }
+      #loginPage button { padding: 5px 10px; font-size: 12px; min-width: 60px; }
       #sendFriendRequest, #sendChat { padding: 8px 12px; }
       #footer { font-size: 12px; }
       #footer a { margin: 0 5px; }
@@ -155,12 +156,12 @@
       .header-pickaxes img { margin: 0 1px; }
       #loginPage, #instructions, #privacy, #terms { 
         width: 95%; 
-        max-width: 300px; 
-        padding: 10px; 
-        font-size: 13px; 
+        max-width: 250px; 
+        padding: 8px; 
+        font-size: 12px; 
       }
-      #loginPage input { padding: 5px; }
-      #loginPage button { padding: 6px 10px; font-size: 12px; min-width: 60px; }
+      #loginPage input { padding: 4px; font-size: 12px; }
+      #loginPage button { padding: 4px 8px; font-size: 11px; min-width: 50px; }
       #footer { padding: 8px 0; }
     }
   </style>
@@ -309,7 +310,7 @@
   <div id="privacy">
     <h2>Privacy Policy</h2>
     <p>Owned by Quantbro Corp. Basics:</p>
-    <okingul style="text-align: left;">
+    <ul style="text-align: left;">
       <li><strong>Data</strong>: Email, game progress, chats, friends stored for functionality.</li>
       <li><strong>Use</strong>: Only for game and leaderboards.</li>
       <li><strong>Sharing</strong>: Only with Firebase and Stripe.</li>
