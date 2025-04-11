@@ -6,8 +6,6 @@
   <meta name="description" content="GoldRushClick: A free online gold mining game where you dig for treasure, upgrade your pickaxe, and explore a rich world of quests and lore.">
   <meta name="keywords" content="gold mining game, idle clicker, free online game, GoldRushClick">
   <title>GoldRushClick - Free Gold Mining Adventure</title>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8529571438098551"
-     crossorigin="anonymous"></script>
   <link rel="icon" type="image/png" href="/images/pickaxe-16.png?v=3" sizes="16x16">
   <link rel="shortcut icon" type="image/x-icon" href="/images/pickaxe-16.ico?v=3">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/pickaxe-16.png?v=3">
@@ -374,6 +372,32 @@
     let coins = 0, dps = 0, multiplier = 1, xp = 0, level = 1, totalClicks = 0, timePlayed = 0;
     let skin = "Default", eventActive = false, dailyDay = 1, chatMessages = [];
 
+    // AdSense loading logic
+    function loadAds() {
+      const loginPage = document.getElementById("loginPage");
+      if (loginPage.classList.contains('active')) {
+        console.log("Login page active, skipping ad load");
+        return;
+      }
+      if (!document.getElementById('adsense-script')) {
+        const script = document.createElement('script');
+        script.id = 'adsense-script';
+        script.async = true;
+        script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8529571438098551";
+        script.crossOrigin = "anonymous";
+        document.head.appendChild(script);
+        console.log("AdSense script loaded");
+      }
+    }
+
+    function removeAds() {
+      const script = document.getElementById('adsense-script');
+      if (script) {
+        script.remove();
+        console.log("AdSense script removed");
+      }
+    }
+
     auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
         user = firebaseUser;
@@ -405,6 +429,7 @@
         const loginPage = document.getElementById("loginPage");
         loginPage.classList.remove('active');
         loginPage.style.display = "none";
+        loadAds(); // Load ads after login completes
       } catch (error) {
         alert("Login failed: " + error.message);
       }
@@ -427,6 +452,7 @@
         const loginPage = document.getElementById("loginPage");
         loginPage.classList.remove('active');
         loginPage.style.display = "none";
+        loadAds(); // Load ads after registration completes
       } catch (error) {
         console.error("Registration failed:", error);
         alert("Registration failed: " + error.message);
@@ -437,12 +463,14 @@
       await saveData();
       await auth.signOut();
       alert("Logged out!");
+      loadAds(); // Reload ads for guest mode on content pages
     }
 
     function toggleAuth() {
       if (user) {
         logout();
       } else {
+        removeAds(); // Remove ads when showing login page
         document.getElementById("loginPage").style.display = "block";
         document.getElementById("loginPage").classList.add('active');
       }
@@ -482,6 +510,7 @@
       }
       updateDisplay();
       updateChat();
+      loadAds(); // Load ads after data load on content pages
     }
 
     async function saveData() {
@@ -512,6 +541,12 @@
         document.getElementById("navMenu").classList.remove('active');
         document.getElementById("navMenu").style.display = "none";
       }
+      const loginPage = document.getElementById("loginPage");
+      if (loginPage.classList.contains('active')) {
+        removeAds();
+      } else {
+        loadAds();
+      }
     }
 
     function showPopup(popupId) {
@@ -524,6 +559,7 @@
       const popup = document.getElementById(popupId);
       popup.style.display = "block";
       popup.dataset.wasLoginActive = wasActive ? "true" : "false";
+      loadAds(); // Load ads for content-rich popups like instructions, privacy, terms
     }
 
     function hidePopup(popupId) {
@@ -533,6 +569,9 @@
       if (!user && popup.dataset.wasLoginActive === "true") {
         loginPage.style.display = "block";
         loginPage.classList.add('active');
+        removeAds(); // Remove ads if login page reappears
+      } else {
+        loadAds(); // Ensure ads load on content pages
       }
       delete popup.dataset.wasLoginActive;
     }
