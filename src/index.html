@@ -13,6 +13,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/images/pickaxe-16.png?v=3">
   <link rel="manifest" href="/manifest.json">
   <style>
+    /* Unchanged styles */
     body { font-family: 'Courier New', monospace; margin: 0; background-color: #fdf6e3; color: #333; }
     nav { background: #d4a017; padding: 10px; text-align: center; position: relative; }
     nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
@@ -290,7 +291,7 @@
     <ul>
       <li><button id="buyBasicPickaxe">Basic Pickaxe (20 coins, +1 DPS)</button> - A reliable tool for new miners.</li>
       <li><button id="buyGoldVault">Gold Vault (2000 coins, +100 DPS)</button> - Store and multiply your riches.</li>
-      <li><button id="buyPremium">Premium Rush ($1, +200 DPS)</button> - Instant power for dedicated players.</li>
+      <li><button id="buyPremiumRush">Premium Rush (3000 coins, +200 DPS)</button> - Instant power for dedicated players.</li>
     </ul>
   </div>
 
@@ -330,7 +331,7 @@
     <ul style="text-align: left;">
       <li><strong>Click for Gold</strong>: Click the "⛏️ Click for Gold!" text to earn coins.</li>
       <li><strong>Buy Upgrades</strong>: Spend coins in the Shop to boost your Digs per Second (DPS).</li>
-      <li><strong>Premium Rush</strong>: Pay $1 for a +200 DPS boost!</li>
+      <li><strong>Premium Rush</strong>: Spend 3000 coins for a +200 DPS boost!</li>
       <li><strong>Quests</strong>: Complete tasks like gathering coins for extra rewards.</li>
       <li><strong>Events</strong>: Catch "Gold Fever" (5x coins, 20s) for huge gains!</li>
       <li><strong>Level Up</strong>: Earn XP to unlock lore and more.</li>
@@ -347,7 +348,7 @@
     <ul style="text-align: left;">
       <li><strong>Data Collected</strong>: We collect your email, game progress (coins, levels), chat messages, and friend lists to enable gameplay, leaderboards, and social features.</li>
       <li><strong>Use of Data</strong>: Your data is used solely to operate the game, personalize your experience, and display leaderboards. We do not sell your information.</li>
-      <li><strong>Third Parties</strong>: We share data with Firebase (for authentication and storage) and Stripe (for payments). Google AdSense may use cookies to serve personalized ads, subject to your consent (see below).</li>
+      <li><strong>Third Parties</strong>: We share data with Firebase (for authentication and storage). Google AdSense may use cookies to serve personalized ads, subject to your consent (see below).</li>
       <li><strong>Cookies</strong>: We use local storage for game progress. If you accept cookies, Google AdSense may use them to tailor ads based on your interests. You can decline cookies, though this may limit ad personalization.</li>
       <li><strong>EEA/UK Users</strong>: We comply with GDPR and UK data laws. You can request data deletion or access via our <a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub</a>.</li>
       <li><strong>Contact</strong>: Reach us via our <a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub repo</a> for questions or concerns.</li>
@@ -361,7 +362,6 @@
     <p>Owned by Quantbro. Last updated: April 1, 2025.</p>
     <ul style="text-align: left;">
       <li><strong>Use</strong>: You agree to play fairly and not use cheats or exploits.</li>
-      <li><strong>Payments</strong>: The $1 Premium Rush is non-refundable and processed securely via Stripe.</li>
       <li><strong>Data</strong>: See our <a href="#" onclick="showPopup('privacy'); return false;">Privacy Policy</a> for details.</li>
       <li><strong>Changes</strong>: We may update these terms at any time.</li>
       <li><strong>Liability</strong>: Play at your own risk; we’re not liable for game-related losses.</li>
@@ -380,9 +380,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://js.stripe.com/v3/"></script>
   <script>
-    const stripe = Stripe('pk_test_51R8lPYDIy2nI1g7e4FE9TCBdq4i6ui8BTzkh2IwBlb8Mj2bNEELO19sZrRwPTacbTBzBKSEoL6aDdEr4Adk2h8tP00kuMmFyoM');
     const firebaseConfig = {
       apiKey: "FIREBASE_API_KEY_PLACEHOLDER", // Untouched per your request
       authDomain: "goldrushclick.firebaseapp.com",
@@ -674,13 +672,8 @@
       }
     }
 
-    function goPremium() {
-      stripe.redirectToCheckout({
-        lineItems: [{ price: 'price_1R8lQcDIy2nI1g7eQdl4RreS', quantity: 1 }],
-        mode: 'payment',
-        successUrl: window.location.href + '?premium=true',
-        cancelUrl: window.location.href
-      });
+    function buyPremiumRush() {
+      buyUpgrade(3000, 200, "Premium Rush");
     }
 
     function buySkin() {
@@ -937,7 +930,7 @@
     document.getElementById("registerBtn").addEventListener("click", register);
     document.getElementById("buyBasicPickaxe").addEventListener("click", () => buyUpgrade(20, 1, "Basic Pickaxe"));
     document.getElementById("buyGoldVault").addEventListener("click", () => buyUpgrade(2000, 100, "Gold Vault"));
-    document.getElementById("buyPremium").addEventListener("click", goPremium);
+    document.getElementById("buyPremiumRush").addEventListener("click", buyPremiumRush);
     document.getElementById("buyGoldenSkin").addEventListener("click", buySkin);
     document.getElementById("claimClick100").addEventListener("click", () => claimQuest("click100"));
     document.getElementById("claimEarn500").addEventListener("click", () => claimQuest("earn500"));
@@ -972,13 +965,6 @@
         }, 20000);
       }
     }, 60000);
-
-    if (window.location.search.includes("premium=true")) {
-      dps += 200;
-      alert("Premium Rush activated! +200 DPS");
-      saveData();
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
 
     loadData();
   </script>
