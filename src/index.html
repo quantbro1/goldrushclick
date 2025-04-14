@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="GoldRushClick: A free online gold mining game where you dig for treasure, upgrade your pickaxe, and explore a rich world of quests and lore.">
-  <meta name="keywords" content="gold mining game, idle clicker, free online game, GoldRushClick">
+  <!-- Enhanced meta description for SEO -->
+  <meta name="description" content="GoldRushClick: Dive into a free online gold mining adventure! Dig for treasure, upgrade tools, complete quests, and uncover ancient lore in this engaging idle clicker game.">
+  <meta name="keywords" content="gold mining game, idle clicker, free online game, GoldRushClick, quests, upgrades, adventure">
+  <meta name="author" content="Quantbro Corp">
   <title>GoldRushClick - Free Gold Mining Adventure</title>
   <link rel="icon" type="image/png" href="/images/pickaxe-16.png?v=3" sizes="16x16">
   <link rel="shortcut icon" type="image/x-icon" href="/images/pickaxe-16.ico?v=3">
@@ -78,6 +80,20 @@
     #hamburger { display: none; font-size: 24px; color: white; cursor: pointer; padding: 5px; }
     #navMenu { display: block; }
     #navMenu.active { display: block; }
+    /* NEW: Cookie consent styling */
+    #cookieConsent { 
+      display: none; 
+      position: fixed; 
+      bottom: 10px; 
+      left: 10px; 
+      background: #fff; 
+      padding: 10px; 
+      border: 1px solid #d4a017; 
+      max-width: 300px; 
+      z-index: 1000; 
+      font-size: 12px; 
+    }
+    #cookieConsent button { padding: 5px 10px; font-size: 12px; margin: 5px; }
 
     /* Mobile Optimizations */
     @media (max-width: 768px) {
@@ -92,7 +108,7 @@
       @keyframes fadeUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-30px); } }
       .progress-bar { width: 80%; max-width: 200px; height: 16px; }
       .page { padding: 15px; min-height: calc(100vh - 120px); }
-      #loginPage, #instructions, #privacy, #terms { 
+      #loginPage, #instructions, #privacy, #terms, #cookieConsent { 
         width: 90%; 
         max-width: 280px; 
         padding: 10px; 
@@ -152,7 +168,7 @@
       .progress-bar { width: 90%; height: 14px; }
       .header-pickaxes { margin-bottom: 10px; }
       .header-pickaxes img { margin: 0 1px; }
-      #loginPage, #instructions, #privacy, #terms { 
+      #loginPage, #instructions, #privacy, #terms, #cookieConsent { 
         width: 95%; 
         max-width: 250px; 
         padding: 8px; 
@@ -165,6 +181,13 @@
   </style>
 </head>
 <body>
+  <!-- Cookie Consent Popup -->
+  <div id="cookieConsent">
+    <p>We use cookies to enhance your experience and serve personalized ads via Google AdSense. By continuing, you agree to our <a href="#" onclick="showPopup('privacy'); return false;">Privacy Policy</a>.</p>
+    <button onclick="acceptCookies()">Accept</button>
+    <button onclick="declineCookies()">Decline</button>
+  </div>
+
   <div id="loginPage" class="page">
     <h1>GoldRushClick Login</h1>
     <p>Email: <input id="emailInput" type="email" placeholder="example@email.com"></p>
@@ -197,7 +220,9 @@
     </div>
     <h1>Welcome to GoldRushClick!</h1>
     <p>Dig for gold, complete quests, and rise to the top in this exciting idle clicker adventure!</p>
-    <p>Welcome to <strong>GoldRushClick</strong>, a free online gold mining game where you take on the role of a determined prospector. Swing your pickaxe to unearth treasures, unlock powerful upgrades, and explore a world filled with quests, events, and ancient lore. Whether you’re here to compete on global leaderboards or enjoy a casual mining experience, GoldRushClick offers endless fun for all players. Start digging today and discover the riches hidden beneath the earth!</p>
+    <!-- Enhanced content for SEO and value -->
+    <p>Welcome to <strong>GoldRushClick</strong>, the ultimate free online gold mining game where you become a prospector in a vibrant world of treasure and adventure. Swing your pickaxe to unearth glittering riches, unlock powerful upgrades, and embark on quests that test your skills. Explore a rich narrative through the ancient lore of the Auric Tribe, compete on global leaderboards, and connect with a thriving community of miners. Whether you’re a casual player or a dedicated digger, GoldRushClick offers endless hours of fun, strategy, and discovery.</p>
+    <p>Our game is designed to captivate players with its blend of idle mechanics and active challenges. Start by clicking to gather coins, then invest in tools like the Basic Pickaxe or Gold Vault to automate your earnings. Join special events like Gold Fever for massive rewards, and uncover the mysteries hidden deep within the mines. With regular updates, new quests, and community features, GoldRushClick keeps the adventure fresh and engaging.</p>
     <button onclick="showPage('game')">Start Digging</button>
     <button onclick="document.getElementById('instructions').style.display='block'">How to Play</button>
     <p>Already a miner? <button onclick="toggleAuth()">Sign In</button> or <button onclick="toggleAuth()">Register</button> to save your progress and join the community!</p>
@@ -212,7 +237,8 @@
 
   <div id="game" class="page">
     <h1>GoldRushClick</h1>
-    <p>Swing your pickaxe and watch your fortune grow! Upgrade your tools and aim for the top in this addictive gold mining adventure.</p>
+    <!-- Added static content -->
+    <p>Swing your pickaxe and watch your fortune grow! GoldRushClick is an addictive gold mining adventure where every click brings you closer to riches. Upgrade your tools, level up, and compete for the top spot on the leaderboard.</p>
     <p>Player: <span id="usernameDisplay">Guest</span> | Level: <span id="level">1</span></p>
     <p>Coins: <span id="coins">0</span> | XP: <span id="xp">0</span></p>
     <p id="gold">⛏️ Click for Gold!</p>
@@ -224,7 +250,9 @@
 
   <div id="profile" class="page">
     <h1>Profile</h1>
-    <p>Track your mining journey and customize your pickaxe!</p>
+    <!-- Expanded content -->
+    <p>Your Miner Profile is your personal hub in GoldRushClick. Track your journey, customize your pickaxe, and showcase your achievements as you climb the ranks of the mining world.</p>
+    <p>In GoldRushClick, every miner has a unique story. Your profile displays key stats like total clicks and time played, reflecting your dedication to uncovering the mines’ treasures. Use coins to unlock exclusive skins, such as the coveted Golden Skin, to stand out in the community. As you level up, new features and rewards become available, making your profile a testament to your skill and strategy.</p>
     <p>Total Clicks: <span id="totalClicks">0</span> | Time Played: <span id="timePlayed">0s</span></p>
     <p>Pickaxe Skin: <span id="skin">Default</span></p>
     <button id="buyGoldenSkin">Buy Golden Skin (500 coins)</button>
@@ -233,9 +261,10 @@
 
   <div id="quests" class="page">
     <h1>Quests</h1>
-    <p>Complete challenges to earn extra coins and boost your mining prowess!</p>
+    <!-- Clarified to avoid ad-click confusion -->
+    <p>Take on exciting challenges to earn coins and boost your mining skills! Complete tasks by playing the game, such as gathering coins or clicking the pickaxe in the Game section.</p>
     <ul id="questList">
-      <li>Click 100 times - <button id="claimClick100">Claim (50 coins)</button></li>
+      <li>Click the pickaxe 100 times - <button id="claimClick100">Claim (50 coins)</button></li>
       <li>Earn 500 coins - <button id="claimEarn500">Claim (100 coins)</button></li>
     </ul>
     <p>Daily Bonus: <button id="claimDaily">Claim (Day <span id="dailyDay">1</span>)</button></p>
@@ -243,28 +272,33 @@
 
   <div id="community" class="page">
     <h1>Community</h1>
-    <p>Connect with fellow miners, climb the ranks, and chat about your adventures!</p>
-    <p>Leaderboard: <ul id="leaderboardList"></ul></p>
-    <p>Friends: <ul id="friendsList"></ul></p>
+    <!-- Added static content and fallback -->
+    <p>Join a vibrant community of miners in GoldRushClick! Connect with friends, climb the global leaderboard, and share your adventures through real-time chat. Whether you’re trading tips or celebrating big wins, the community is the heart of the game.</p>
+    <p>Leaderboard: <ul id="leaderboardList"><li>Start mining to see top players!</li></ul></p>
+    <p>Friends: <ul id="friendsList"><li>Sign in to add friends!</li></ul></p>
     <p>Add Friend: <input id="friendEmail" placeholder="Friend's email"><button id="sendFriendRequest">Send Request</button></p>
-    <p>Pending Requests: <ul id="pendingRequests"></ul></p>
+    <p>Pending Requests: <ul id="pendingRequests"><li>No pending requests yet!</li></ul></p>
     <p>Chat: <input id="chatInput" placeholder="Say something..."><button id="sendChat">Send</button></p>
-    <ul id="chatList"></ul>
+    <ul id="chatList"><li>Sign in to join the conversation!</li></ul>
   </div>
 
   <div id="shop" class="page">
     <h1>Shop</h1>
-    <p>Upgrade your mining gear to dig faster and earn more!</p>
+    <!-- Expanded content -->
+    <p>Visit the GoldRushClick Shop to upgrade your mining gear and skyrocket your earnings! From basic tools to premium boosts, every purchase helps you dig deeper and faster.</p>
+    <p>The shop is your one-stop destination for enhancing your gameplay. Invest in the Basic Pickaxe for steady automation, splurge on the Gold Vault for massive output, or unlock the Premium Rush for an instant advantage. Each upgrade is crafted to balance strategy and reward, ensuring every coin spent brings you closer to legendary status in the mines.</p>
     <ul>
-      <li><button id="buyBasicPickaxe">Basic Pickaxe (20 coins, +1 DPS)</button></li>
-      <li><button id="buyGoldVault">Gold Vault (2000 coins, +100 DPS)</button></li>
-      <li><button id="buyPremium">Premium Rush ($1, +200 DPS)</button></li>
+      <li><button id="buyBasicPickaxe">Basic Pickaxe (20 coins, +1 DPS)</button> - A reliable tool for new miners.</li>
+      <li><button id="buyGoldVault">Gold Vault (2000 coins, +100 DPS)</button> - Store and multiply your riches.</li>
+      <li><button id="buyPremium">Premium Rush ($1, +200 DPS)</button> - Instant power for dedicated players.</li>
     </ul>
   </div>
 
   <div id="events" class="page">
     <h1>Events</h1>
-    <p>Join special events to boost your earnings and uncover surprises!</p>
+    <!-- Added static content -->
+    <p>Jump into thrilling events in GoldRushClick to boost your earnings and uncover surprises! From Gold Fever to Rock Smash, each event offers unique rewards and challenges.</p>
+    <p>Events are the pulse of GoldRushClick, bringing miners together for limited-time opportunities. Past events have included double XP weekends and treasure hunts, with more exciting additions planned. Check back often to catch the next big moment in the mines!</p>
     <p>Current Event: <span id="eventStatus">None</span></p>
     <button id="playRockSmash">Play Rock Smash (10 coins)</button>
   </div>
@@ -297,7 +331,7 @@
       <li><strong>Click for Gold</strong>: Click the "⛏️ Click for Gold!" text to earn coins.</li>
       <li><strong>Buy Upgrades</strong>: Spend coins in the Shop to boost your Digs per Second (DPS).</li>
       <li><strong>Premium Rush</strong>: Pay $1 for a +200 DPS boost!</li>
-      <li><strong>Quests</strong>: Complete tasks like "Click 100 times" for extra coins.</li>
+      <li><strong>Quests</strong>: Complete tasks like gathering coins for extra rewards.</li>
       <li><strong>Events</strong>: Catch "Gold Fever" (5x coins, 20s) for huge gains!</li>
       <li><strong>Level Up</strong>: Earn XP to unlock lore and more.</li>
       <li><strong>Community</strong>: Add friends, chat, and check the leaderboard!</li>
@@ -307,29 +341,32 @@
 
   <div id="privacy">
     <h2>Privacy Policy</h2>
-    <p>Owned by Quantbro Corp. Basics:</p>
+    <p>Owned by Quantbro Corp. Last updated: April 1, 2025.</p>
+    <!-- Expanded for AdSense compliance -->
+    <p>At GoldRushClick, we value your privacy. This policy explains how we collect, use, and protect your data to provide a seamless gaming experience.</p>
     <ul style="text-align: left;">
-      <li><strong>Data</strong>: Email, game progress, chats, friends stored for functionality.</li>
-      <li><strong>Use</strong>: Only for game and leaderboards.</li>
-      <li><strong>Sharing</strong>: Only with Firebase and Stripe.</li>
-      <li><strong>Cookies</strong>: Local storage only.</li>
-      <li><strong>Contact</strong>: GitHub repo.</li>
+      <li><strong>Data Collected</strong>: We collect your email, game progress (coins, levels), chat messages, and friend lists to enable gameplay, leaderboards, and social features.</li>
+      <li><strong>Use of Data</strong>: Your data is used solely to operate the game, personalize your experience, and display leaderboards. We do not sell your information.</li>
+      <li><strong>Third Parties</strong>: We share data with Firebase (for authentication and storage) and Stripe (for payments). Google AdSense may use cookies to serve personalized ads, subject to your consent (see below).</li>
+      <li><strong>Cookies</strong>: We use local storage for game progress. If you accept cookies, Google AdSense may use them to tailor ads based on your interests. You can decline cookies, though this may limit ad personalization.</li>
+      <li><strong>EEA/UK Users</strong>: We comply with GDPR and UK data laws. You can request data deletion or access via our <a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub</a>.</li>
+      <li><strong>Contact</strong>: Reach us via our <a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub repo</a> for questions or concerns.</li>
     </ul>
-    <p>Last updated: April 1, 2025.</p>
+    <p>For more on Google AdSense’s data practices, see <a href="https://policies.google.com/privacy" target="_blank">Google’s Privacy Policy</a>.</p>
     <button onclick="hidePopup('privacy')">Close</button>
   </div>
 
   <div id="terms">
     <h2>Terms of Service</h2>
-    <p>Owned by Quantbro Corp. Rules:</p>
+    <p>Owned by Quantbro Corp. Last updated: April 1, 2025.</p>
     <ul style="text-align: left;">
-      <li><strong>Use</strong>: No cheating.</li>
-      <li><strong>Payments</strong>: $1 Premium Rush, non-refundable.</li>
-      <li><strong>Data</strong>: See Privacy Policy.</li>
-      <li><strong>Changes</strong>: Terms may update.</li>
-      <li><strong>Liability</strong>: Play at your own risk.</li>
+      <li><strong>Use</strong>: You agree to play fairly and not use cheats or exploits.</li>
+      <li><strong>Payments</strong>: The $1 Premium Rush is non-refundable and processed securely via Stripe.</li>
+      <li><strong>Data</strong>: See our <a href="#" onclick="showPopup('privacy'); return false;">Privacy Policy</a> for details.</li>
+      <li><strong>Changes</strong>: We may update these terms at any time.</li>
+      <li><strong>Liability</strong>: Play at your own risk; we’re not liable for game-related losses.</li>
     </ul>
-    <p><a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub</a>. Last updated: April 1, 2025.</p>
+    <p>Contact us via <a href="https://github.com/quantbro1/goldrushclick" target="_blank">GitHub</a>.</p>
     <button onclick="hidePopup('terms')">Close</button>
   </div>
 
@@ -347,7 +384,7 @@
   <script>
     const stripe = Stripe('pk_test_51R8lPYDIy2nI1g7e4FE9TCBdq4i6ui8BTzkh2IwBlb8Mj2bNEELO19sZrRwPTacbTBzBKSEoL6aDdEr4Adk2h8tP00kuMmFyoM');
     const firebaseConfig = {
-      apiKey: "FIREBASE_API_KEY_PLACEHOLDER",
+      apiKey: "FIREBASE_API_KEY_PLACEHOLDER", // Untouched per your request
       authDomain: "goldrushclick.firebaseapp.com",
       projectId: "goldrushclick",
       storageBucket: "goldrushclick.firebasestorage.app",
@@ -371,12 +408,36 @@
     let username = "Guest";
     let coins = 0, dps = 0, multiplier = 1, xp = 0, level = 1, totalClicks = 0, timePlayed = 0;
     let skin = "Default", eventActive = false, dailyDay = 1, chatMessages = [];
+    let cookiesAccepted = false; // NEW: Track cookie consent
 
-    // AdSense loading logic
+    // NEW: Cookie consent functions
+    function showCookieConsent() {
+      if (!localStorage.getItem('cookieConsent')) {
+        document.getElementById('cookieConsent').style.display = 'block';
+      }
+    }
+
+    function acceptCookies() {
+      cookiesAccepted = true;
+      localStorage.setItem('cookieConsent', 'accepted');
+      document.getElementById('cookieConsent').style.display = 'none';
+      loadAds(); // Load ads only after consent
+    }
+
+    function declineCookies() {
+      cookiesAccepted = false;
+      localStorage.setItem('cookieConsent', 'declined');
+      document.getElementById('cookieConsent').style.display = 'none';
+      removeAds(); // Ensure no ads load
+    }
+
+    // Hardened ad loading logic
     function loadAds() {
       const loginPage = document.getElementById("loginPage");
-      if (loginPage.classList.contains('active')) {
-        console.log("Login page active, skipping ad load");
+      const currentPage = document.querySelector('.page.active:not(#loginPage)');
+      if (loginPage.classList.contains('active') || !currentPage || !cookiesAccepted) {
+        console.log("Skipping ad load: login active, no content page, or cookies declined");
+        removeAds(); // Proactively remove ads
         return;
       }
       if (!document.getElementById('adsense-script')) {
@@ -396,6 +457,9 @@
         script.remove();
         console.log("AdSense script removed");
       }
+      // NEW: Clear any ad-related DOM elements if added
+      const adElements = document.querySelectorAll('ins.adsbygoogle');
+      adElements.forEach(el => el.remove());
     }
 
     auth.onAuthStateChanged(async (firebaseUser) => {
@@ -419,6 +483,7 @@
         document.getElementById("authToggle").textContent = "Sign In";
         showPage('home');
       }
+      showCookieConsent(); // Show consent after auth check
     });
 
     async function login() {
@@ -429,7 +494,7 @@
         const loginPage = document.getElementById("loginPage");
         loginPage.classList.remove('active');
         loginPage.style.display = "none";
-        loadAds(); // Load ads after login completes
+        showCookieConsent();
       } catch (error) {
         alert("Login failed: " + error.message);
       }
@@ -452,7 +517,7 @@
         const loginPage = document.getElementById("loginPage");
         loginPage.classList.remove('active');
         loginPage.style.display = "none";
-        loadAds(); // Load ads after registration completes
+        showCookieConsent();
       } catch (error) {
         console.error("Registration failed:", error);
         alert("Registration failed: " + error.message);
@@ -463,14 +528,14 @@
       await saveData();
       await auth.signOut();
       alert("Logged out!");
-      loadAds(); // Reload ads for guest mode on content pages
+      showCookieConsent();
     }
 
     function toggleAuth() {
       if (user) {
         logout();
       } else {
-        removeAds(); // Remove ads when showing login page
+        removeAds();
         document.getElementById("loginPage").style.display = "block";
         document.getElementById("loginPage").classList.add('active');
       }
@@ -510,7 +575,7 @@
       }
       updateDisplay();
       updateChat();
-      loadAds(); // Load ads after data load on content pages
+      loadAds();
     }
 
     async function saveData() {
@@ -544,7 +609,7 @@
       const loginPage = document.getElementById("loginPage");
       if (loginPage.classList.contains('active')) {
         removeAds();
-      } else {
+      } else if (cookiesAccepted) {
         loadAds();
       }
     }
@@ -559,7 +624,7 @@
       const popup = document.getElementById(popupId);
       popup.style.display = "block";
       popup.dataset.wasLoginActive = wasActive ? "true" : "false";
-      loadAds(); // Load ads for content-rich popups like instructions, privacy, terms
+      loadAds();
     }
 
     function hidePopup(popupId) {
@@ -569,9 +634,9 @@
       if (!user && popup.dataset.wasLoginActive === "true") {
         loginPage.style.display = "block";
         loginPage.classList.add('active');
-        removeAds(); // Remove ads if login page reappears
-      } else {
-        loadAds(); // Ensure ads load on content pages
+        removeAds();
+      } else if (cookiesAccepted) {
+        loadAds();
       }
       delete popup.dataset.wasLoginActive;
     }
@@ -751,7 +816,7 @@
       friendsList.innerHTML = "";
       const friendsSnapshot = await db.collection("players").doc(user.uid).collection("friends").get();
       if (friendsSnapshot.empty) {
-        friendsList.innerHTML = "<li>No friends yet!</li>";
+        friendsList.innerHTML = "<li>No friends yet! Add some miners.</li>";
         return;
       }
       friendsSnapshot.forEach(async (doc) => {
@@ -776,7 +841,7 @@
         .where("status", "==", "pending")
         .get();
       if (requestsSnapshot.empty) {
-        pendingList.innerHTML = "<li>No pending requests!</li>";
+        pendingList.innerHTML = "<li>No pending requests! Invite friends to join.</li>";
         return;
       }
       requestsSnapshot.forEach(async (doc) => {
@@ -807,7 +872,7 @@
       const chatList = document.getElementById("chatList");
       chatList.innerHTML = "";
       if (!user) {
-        chatList.innerHTML = "<li>Sign in to chat!</li>";
+        chatList.innerHTML = "<li>Sign in to chat with miners!</li>";
         return;
       }
       chatMessages.slice(-5).forEach(msg => {
@@ -819,7 +884,7 @@
 
     async function updateLeaderboard() {
       if (!user) {
-        document.getElementById("leaderboardList").innerHTML = "<li>Sign in to see leaderboard!</li>";
+        document.getElementById("leaderboardList").innerHTML = "<li>Sign in to see the leaderboard!</li>";
         return;
       }
       try {
@@ -831,7 +896,7 @@
         const leaderboardList = document.getElementById("leaderboardList");
         leaderboardList.innerHTML = "";
         if (snapshot.empty) {
-          leaderboardList.innerHTML = "<li>No players yet!</li>";
+          leaderboardList.innerHTML = "<li>No players yet! Be the first to lead.</li>";
           return;
         }
         snapshot.forEach(doc => {
@@ -861,7 +926,6 @@
       document.getElementById("xpNext").textContent = xpNeeded;
       document.getElementById("xpProgress").style.width = `${(xp / xpNeeded) * 100}%`;
 
-      // Update lore chapter visibility
       document.getElementById("chapter1").classList.toggle("visible", level >= 1);
       document.getElementById("chapter2").classList.toggle("visible", level >= 5);
       document.getElementById("chapter3").classList.toggle("visible", level >= 10);
@@ -882,7 +946,6 @@
     document.getElementById("sendFriendRequest").addEventListener("click", sendFriendRequest);
     document.getElementById("sendChat").addEventListener("click", sendChat);
 
-    // Hamburger menu toggle
     document.getElementById("hamburger").addEventListener("click", () => {
       const navMenu = document.getElementById("navMenu");
       navMenu.classList.toggle('active');
